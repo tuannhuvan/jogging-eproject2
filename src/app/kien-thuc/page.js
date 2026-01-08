@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-export default function BaiVietPage() {
+export default function KienThucPage() {
   const [posts, setPosts] = useState([])
   const [categories, setCategories] = useState([])
   const [activeCategory, setActiveCategory] = useState('all')
@@ -42,7 +42,7 @@ export default function BaiVietPage() {
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Kiến thức chạy bộ</h1>
           <p className="text-xl text-white/90">
-            Kiến thức chạy bộ từ chuyên gia cho mọi cấp độ
+            Kỹ thuật, dinh dưỡng và kinh nghiệm từ các chuyên gia
           </p>
         </div>
       </div>
@@ -80,12 +80,12 @@ export default function BaiVietPage() {
               </div>
             ) : filteredPosts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">Chưa có bài viết nào trong danh mục này.</p>
+                <p className="text-muted-foreground">Chưa có nội dung nào trong danh mục này.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredPosts.map((post, index) => (
-                    <Link key={post.id} href={`/kien-thuc/${post.slug}`} className="group">
+                {filteredPosts.map((post, index) => (
+                  <Link key={post.id} href={`/kien-thuc/${post.slug}`} className="group">
                     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in h-full" style={{ animationDelay: `${index * 50}ms` }}>
                       <div className="relative h-48 overflow-hidden">
                         <Image

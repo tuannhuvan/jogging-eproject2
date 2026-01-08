@@ -78,6 +78,122 @@ export const api = {
     return count;
   },
   
+  // Clubs API
+  async getClubs() {
+    const { data, error } = await supabase
+      .from('clubs')
+      .select('*, club_members(count)')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  async getClubById(id) {
+    const { data, error } = await supabase
+      .from('clubs')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async createClub(clubData) {
+    const { data, error } = await supabase
+      .from('clubs')
+      .insert(clubData)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getClubMembers(clubId) {
+    const { data, error } = await supabase
+      .from('club_members')
+      .select('*, profiles(*)')
+      .eq('club_id', clubId);
+    if (error) throw error;
+    return data;
+  },
+
+  async getClubPosts(clubId) {
+    const { data, error } = await supabase
+      .from('club_posts')
+      .select('*')
+      .eq('club_id', clubId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  async getFollowStatus(clubId, userId) {
+    const { data, error } = await supabase
+      .from('club_follows')
+      .select('*')
+      .eq('club_id', clubId)
+      .eq('profile_id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    return !!data;
+  },
+
+  async toggleFollowClub(clubId, userId, isFollowing) {
+    if (isFollowing) {
+      const { error } = await supabase
+        .from('club_follows')
+        .delete()
+        .eq('club_id', clubId)
+        .eq('profile_id', userId);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from('club_follows')
+        .insert({ club_id: clubId, profile_id: userId });
+      if (error) throw error;
+    }
+  },
+
+  // Events API
+  async getEvents() {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('date', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async getEventById(id) {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getUserRegistration(eventId, userId) {
+    const { data, error } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('event_id', eventId)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteRegistration(id) {
+    const { error } = await supabase
+      .from('registrations')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+  
   async postData(endpoint, data) {
     if (endpoint === 'submit_review.php') {
       const { data: review, error } = await supabase
@@ -129,6 +245,24 @@ export const api = {
       }
       
       return order;
+    }
+
+    if (endpoint === 'create_registration.php') {
+      const { data: registration, error } = await supabase
+        .from('registrations')
+        .insert({
+          event_id: data.event_id,
+          user_id: data.user_id,
+          full_name: data.full_name,
+          email: data.email,
+          distance: data.distance,
+          payment_status: 'pending'
+        })
+        .select()
+        .single();
+      
+      if (error) return { error: error.message };
+      return registration;
     }
     
     console.warn(`postData endpoint ${endpoint} is not specifically handled`);

@@ -16,9 +16,11 @@ import {
 
 const navLinks = [
   { href: '/', label: 'Trang chủ' },
-  { href: '/bai-viet', label: 'Tư vấn & Bài viết' },
+  { href: '/events', label: 'Sự kiện' },
+  { href: '/kien-thuc', label: 'Kiến thức' },
   { href: '/dinh-duong', label: 'Dinh dưỡng' },
   { href: '/shop', label: 'Cửa hàng' },
+  { href: '/clubs', label: 'Cộng đồng' },
 ]
 
 export function Header() {
@@ -28,13 +30,11 @@ export function Header() {
   const { user, profile, signOut } = useAuth()
   const { totalItems } = useCart()
 
-  useEffect(() => {
+    useEffect(() => {
     async function fetchVisitorCount() {
       try {
-        const data = await api.getVisitors()
-        if (data && data.count) {
-          setVisitorCount(data.count)
-        }
+        const count = await api.getVisitors()
+        setVisitorCount(count || 0)
       } catch (error) {
         console.error('Error fetching visitor count:', error)
       }
