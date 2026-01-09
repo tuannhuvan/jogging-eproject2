@@ -58,11 +58,13 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full 
+            flex items-center justify-center">
               <span className="text-white font-bold text-lg">J</span>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-              JOG.com.vn
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary 
+            to-accent bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+              JOG
             </span>
           </Link>
 

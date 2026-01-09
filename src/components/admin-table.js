@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Plus, Search, MoreHorizontal, Trash2, Edit } from 'lucide-react'
 
+// Bảng quản trị cho các bảng dữ liệu khác nhau
 export function AdminTable({ 
   title, 
   table, 
@@ -16,10 +17,12 @@ export function AdminTable({
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
 
+  // Tải dữ liệu từ database khi component được gắn kết
   useEffect(() => {
     fetchData()
   }, [])
 
+  // Hàm tải dữ liệu từ Supabase
   async function fetchData() {
     setLoading(true)
     const { data, error } = await supabase
@@ -31,6 +34,7 @@ export function AdminTable({
     setLoading(false)
   }
 
+  // Hàm xử lý xóa mục
   async function handleDelete(id) {
     if (!confirm('Bạn có chắc chắn muốn xóa mục này?')) return
     
@@ -46,6 +50,7 @@ export function AdminTable({
     }
   }
 
+  // Hàm thêm mục mẫu mới
   async function handleAddSample() {
     const sampleData = {
       events: { title: 'Giải chạy Marathon Mẫu ' + Date.now(), date: new Date().toISOString(), location: 'Hà Nội', status: 'published' },
@@ -56,8 +61,10 @@ export function AdminTable({
       reviews: { user_name: 'Người dùng Mẫu', rating: 5, comment: 'Dịch vụ tuyệt vời! ' + Date.now() },
     }
 
+    // Chèn dữ liệu mẫu vào bảng tương ứng
     const dataToInsert = sampleData[table] || { created_at: new Date().toISOString() }
     
+    // Thêm mục mới vào database
     const { data: inserted, error } = await supabase
       .from(table)
       .insert([dataToInsert])
@@ -70,6 +77,7 @@ export function AdminTable({
     }
   }
 
+  // Lọc dữ liệu dựa trên từ khóa tìm kiếm
   const filteredData = data.filter(item => 
     String(item[searchField] || '').toLowerCase().includes(searchTerm.toLowerCase())
   )

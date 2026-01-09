@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/lib/auth-context'
 import { toast } from 'sonner'
 
+// Trang chi tiết bài viết kiến thức
 export default function PostDetailPage() {
   const params = useParams()
   const { user, profile } = useAuth()
@@ -21,6 +22,7 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
+  // Tải dữ liệu bài viết và bình luận khi component được gắn kết
   useEffect(() => {
     async function fetchPost() {
       const { data } = await supabase
@@ -44,6 +46,7 @@ export default function PostDetailPage() {
     fetchPost()
   }, [params.slug])
 
+  // Hàm xử lý gửi bình luận mới
   async function handleSubmitComment(e) {
     e.preventDefault()
     if (!user || !profile || !post || !newComment.trim()) return
@@ -70,6 +73,7 @@ export default function PostDetailPage() {
     setSubmitting(false)
   }
 
+  // Hiển thị trạng thái tải dữ liệu
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -86,6 +90,7 @@ export default function PostDetailPage() {
     )
   }
 
+  // Hiển thị thông báo nếu không tìm thấy bài viết
     if (!post) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
@@ -97,6 +102,7 @@ export default function PostDetailPage() {
     )
   }
 
+  // Hiển thị nội dung bài viết và bình luận
   return (
     <div className="min-h-screen">
       <div className="relative h-[300px] md:h-[400px]">

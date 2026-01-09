@@ -2,15 +2,18 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
+// Khởi tạo Stripe và Supabase client
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-11-20.acacia',
 })
 
+// Supabase service role key để có quyền ghi dữ liệu
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+// Hàm xử lý thanh toán đăng ký sự kiện
 export async function POST(request) {
     try {
       const { registrationId, eventId, eventName, distance, email } = await request.json()

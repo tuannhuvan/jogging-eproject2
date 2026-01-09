@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 
+// Trang cài đặt hệ thống cho admin
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     siteName: 'Jogging Portal',

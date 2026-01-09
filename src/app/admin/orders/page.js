@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý đơn hàng
 export default function OrdersPage() {
   const columns = [
     { key: 'id', label: 'Mã đơn hàng' },

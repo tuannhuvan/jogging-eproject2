@@ -2,19 +2,26 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { MapPin, Clock, Calendar, Facebook, Instagram, Youtube, Mail, Phone } from 'lucide-react'
+
+// Footer của ứng dụng
 export function Footer() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [location, setLocation] = useState(null)
+  
+  // Cập nhật thời gian hiện tại mỗi giây
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
+  
+  // Lấy vị trí địa lý của người dùng
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords
           try {
+            // Sử dụng dịch vụ ngược để lấy tên thành phố từ tọa độ
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
             )
@@ -26,12 +33,14 @@ export function Footer() {
             })
           } catch {
             setLocation({ lat: latitude, lng: longitude, city: 'Việt Nam' })
-          }
+          } // Xử lý lỗi khi không thể lấy tên thành phố
         },
-        () => setLocation({ lat: 21.028511, lng: 105.804817, city: 'Hà Nội' })
+        () => setLocation({ lat: 21.028511, lng: 105.804817, city: 'Hà Nội' }) // Vị trí mặc định nếu không được phép
       )
     }
   }, [])
+  
+  // Nội dung của ticker
   const tickerContent = `
     📅 ${currentTime.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
     ⏰ ${currentTime.toLocaleTimeString('vi-VN')}
@@ -51,10 +60,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full 
+              flex items-center justify-center">
                 <span className="text-white font-bold text-lg">J</span>
               </div>
-              <span className="text-2xl font-bold">JOG.com.vn</span>
+              <span className="text-2xl font-bold">JOG</span>
             </div>
             <p className="text-white/70 text-sm mb-4">
               Cổng thông tin chạy bộ hàng đầu Việt Nam. Cung cấp kiến thức, kỹ thuật và trang thiết bị chất lượng cho cộng đồng Runner.
@@ -93,7 +103,7 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-white/70">
               <li className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary" />
-                <span>123 Nguyễn Trãi, Hà Nội</span>
+                <span>13 Trịnh Văn Bô, Hà Nội</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-primary" />
@@ -111,7 +121,7 @@ export function Footer() {
           </div>
         </div>
         <div className="border-t border-white/10 mt-8 pt-8 text-center text-sm text-white/50">
-          <p>© 2024 JOG.com.vn. Bản quyền thuộc về cộng đồng Runner Việt Nam.</p>
+          <p>© 2026 jog.com.vn Bản quyền thuộc về cộng đồng Runner Việt Nam.</p>
         </div>
       </div>
     </footer>

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
+// Trang dashboard cá nhân của người dùng
 export default function DashboardPage() {
   const { user, profile, signOut, loading: authLoading } = useAuth()
   const router = useRouter()
@@ -47,6 +48,7 @@ export default function DashboardPage() {
   const [reviews, setReviews] = useState([])
   const [comments, setComments] = useState([])
 
+  // Tải dữ liệu dashboard khi component được gắn kết
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/dang-nhap')
@@ -68,6 +70,7 @@ export default function DashboardPage() {
     }
   }, [user, profile, authLoading])
 
+  // Hàm tải dữ liệu dashboard
   async function fetchDashboardData() {
     try {
       setLoading(true)
@@ -121,6 +124,7 @@ export default function DashboardPage() {
     }
   }
 
+  // Hàm xử lý cập nhật hồ sơ người dùng
   const handleUpdateProfile = async (e) => {
     e.preventDefault()
     try {
@@ -146,6 +150,7 @@ export default function DashboardPage() {
     }
   }
 
+  // Hàm xử lý hủy đăng ký giải chạy
   async function handleCancelRegistration(id, status) {
     if (status === 'paid') {
       toast.error('Không thể hủy đăng ký đã thanh toán')
@@ -172,6 +177,7 @@ export default function DashboardPage() {
     return <div className="min-h-screen flex items-center justify-center">Đang tải...</div>
   }
 
+  // Hiển thị nội dung trang dashboard
   return (
     <div className="min-h-screen bg-muted/30 pb-12">
       {/* Header Section */}

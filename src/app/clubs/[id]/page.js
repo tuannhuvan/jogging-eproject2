@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 
+// Trang chi tiết câu lạc bộ chạy bộ
 export default function ClubDetailPage() {
   const { id } = useParams()
   const [club, setClub] = useState(null)
@@ -26,6 +27,7 @@ export default function ClubDetailPage() {
   const [isFollowing, setIsFollowing] = useState(false)
   const [user, setUser] = useState(null)
 
+  // Tải dữ liệu câu lạc bộ khi component được gắn kết
   useEffect(() => {
     async function fetchData() {
       try {
@@ -54,6 +56,7 @@ export default function ClubDetailPage() {
     fetchData()
   }, [id])
 
+  // Hàm xử lý theo dõi / hủy theo dõi câu lạc bộ
   const handleFollow = async () => {
     if (!user) return alert('Vui lòng đăng nhập để theo dõi')
     try {
@@ -72,6 +75,7 @@ export default function ClubDetailPage() {
 
   if (!club) return <div className="min-h-screen flex items-center justify-center">Không tìm thấy câu lạc bộ</div>
 
+  // Hàm lấy badge vai trò thành viên
   const getRoleBadge = (role) => {
     const roles = {
       president: { label: 'Chủ tịch', color: 'bg-red-500', icon: <ShieldCheck className="w-3 h-3" /> },
@@ -88,6 +92,7 @@ export default function ClubDetailPage() {
     )
   }
 
+  // Hiển thị nội dung trang chi tiết câu lạc bộ
   return (
     <div className="min-h-screen bg-muted/30 pb-20">
       {/* Central Photo / Hero */}

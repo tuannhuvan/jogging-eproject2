@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { api } from '@/lib/api'
 
+// Dữ liệu cho các slide banner trên trang chủ
 const bannerSlides = [
   {
     title: "Khám phá thế giới chạy bộ",
@@ -29,12 +30,14 @@ const bannerSlides = [
   }
 ]
 
+// Trang chủ của ứng dụng
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [posts, setPosts] = useState([])
   const [products, setProducts] = useState([])
   const [events, setEvents] = useState([])
 
+  // Tự động chuyển slide mỗi 5 giây
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % bannerSlides.length)
@@ -42,27 +45,29 @@ export default function HomePage() {
     return () => clearInterval(timer)
   }, [])
 
+  // Lấy dữ liệu bài viết, sản phẩm và sự kiện từ API khi component được mount
   useEffect(() => {
     async function fetchData() {
       try {
         const [postsRes, productsRes, eventsRes] = await Promise.all([
-          api.getPosts({ is_featured: 'true', limit: 3 }),
-          api.getProducts({ is_featured: 'true', limit: 4 }),
-          api.getEvents()
+          api.getPosts({ is_featured: 'true', limit: 3 }), // Lấy 3 bài viết nổi bật
+          api.getProducts({ is_featured: 'true', limit: 4 }), // Lấy 4 sản phẩm nổi bật
+          api.getEvents() // Lấy tất cả sự kiện
         ])
-        if (postsRes) setPosts(postsRes)
-        if (productsRes) setProducts(productsRes)
-        if (eventsRes) setEvents(eventsRes.filter(e => e.status === 'Open').slice(0, 3))
+        if (postsRes) setPosts(postsRes) // Lấy bài viết nổi bật
+        if (productsRes) setProducts(productsRes) // Lấy sản phẩm nổi bật
+        if (eventsRes) setEvents(eventsRes.filter(e => e.status === 'Open').slice(0, 3)) // Lấy 3 sự kiện sắp diễn ra
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Error fetching data:', error) // Xử lý lỗi khi lấy dữ liệu
       }
     }
     fetchData()
   }, [])
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % bannerSlides.length)
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length)
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % bannerSlides.length) // Chuyển đến slide tiếp theo
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length) // Chuyển đến slide trước đó
 
+  // Giao diện trang chủ
   return (
     <div>
       <section className="relative h-[500px] md:h-[600px] overflow-hidden">
@@ -71,7 +76,7 @@ export default function HomePage() {
             key={index}
             className={`absolute inset-0 transition-opacity duration-1000 ${
               index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
+            }`} // Hiệu ứng chuyển đổi mờ dần
           >
             <Image
               src={slide.image}
@@ -88,9 +93,9 @@ export default function HomePage() {
                     {slide.title}
                   </h1>
                   <p className="text-xl text-white/90 mb-8">
-                    {slide.subtitle}
+                    {slide.subtitle} 
                   </p>
-                  <Link href={slide.cta.href}>
+                  <Link href={slide.cta.href}> 
                     <Button size="lg" className="gap-2">
                       {slide.cta.text}
                       <ArrowRight className="w-4 h-4" />
@@ -103,14 +108,16 @@ export default function HomePage() {
         ))}
         
         <button
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-colors"
+          onClick={prevSlide} // Nút chuyển đến slide trước
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 
+          rounded-full flex items-center justify-center text-white transition-colors"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 
+          rounded-full flex items-center justify-center text-white transition-colors"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -122,7 +129,7 @@ export default function HomePage() {
               onClick={() => setCurrentSlide(index)}
               className={`w-3 h-3 rounded-full transition-all ${
                 index === currentSlide ? 'bg-white w-8' : 'bg-white/50'
-              }`}
+              }`} // Chấm chỉ mục slide với hiệu ứng kích thước
             />
           ))}
         </div>
@@ -132,9 +139,11 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             <Link href="/events" className="group">
-              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 
+              border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center 
+                  mb-4 group-hover:scale-110 transition-transform">
                     <Calendar className="w-8 h-8 text-blue-500" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Sự kiện</h3>
@@ -146,9 +155,11 @@ export default function HomePage() {
             </Link>
 
             <Link href="/kien-thuc" className="group">
-              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 
+              border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center 
+                  mb-4 group-hover:scale-110 transition-transform">
                     <BookOpen className="w-8 h-8 text-emerald-500" />
                   </div>
                     <h3 className="text-xl font-bold mb-2">Kiến thức chạy bộ</h3>
@@ -160,9 +171,11 @@ export default function HomePage() {
             </Link>
             
             <Link href="/dinh-duong" className="group">
-              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 
+              border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center 
+                  mb-4 group-hover:scale-110 transition-transform">
                     <Apple className="w-8 h-8 text-rose-500" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Dinh dưỡng</h3>
@@ -174,9 +187,11 @@ export default function HomePage() {
             </Link>
 
             <Link href="/clubs" className="group">
-              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 
+              border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center 
+                  mb-4 group-hover:scale-110 transition-transform">
                     <Users className="w-8 h-8 text-orange-500" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Cộng đồng</h3>
@@ -188,9 +203,11 @@ export default function HomePage() {
             </Link>
             
             <Link href="/shop" className="group">
-              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 
+              border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center 
+                  mb-4 group-hover:scale-110 transition-transform">
                     <ShoppingBag className="w-8 h-8 text-teal-500" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Cửa hàng</h3>
@@ -230,12 +247,14 @@ export default function HomePage() {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary">
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm 
+                      px-3 py-1 rounded-full text-xs font-bold text-primary">
                         Sắp diễn ra
                       </div>
                     </div>
                     <CardContent className="p-5">
-                      <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-1">
+                      <h3 className="text-xl font-bold mb-3 group-hover:text-primary 
+                      transition-colors line-clamp-1">
                         {event.name}
                       </h3>
                       <div className="space-y-2">
@@ -274,7 +293,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {posts.map((post, index) => (
               <Link key={post.id} href={`/kien-thuc/${post.slug}`} className="group">
-                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: `${index * 100}ms` }}>
+                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 
+                animate-fade-in bg-white" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className="relative h-48 overflow-hidden">
                     <Image
                       src={post.image_url || 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800'}
@@ -316,7 +336,8 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {products.map((product, index) => (
               <Link key={product.id} href={`/shop/${product.slug}`} className="group">
-                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 
+                animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className="relative aspect-square overflow-hidden bg-muted">
                     <Image
                       src={product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'}
@@ -325,13 +346,15 @@ export default function HomePage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {product.original_price && product.original_price > product.price && (
-                      <span className="absolute top-2 left-2 bg-destructive text-white text-xs px-2 py-1 rounded">
+                      <span className="absolute top-2 left-2 bg-destructive text-white 
+                      text-xs px-2 py-1 rounded">
                         -{Math.round((1 - product.price / product.original_price) * 100)}%
                       </span>
                     )}
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                    <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary 
+                    transition-colors">
                       {product.name}
                     </h3>
                     <div className="flex items-center gap-1 mt-2">
@@ -369,7 +392,8 @@ export default function HomePage() {
             <input
               type="email"
               placeholder="Email của bạn"
-              className="flex-1 px-4 py-3 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-white"
+              className="flex-1 px-4 py-3 rounded-lg text-foreground focus:outline-none 
+              focus:ring-2 focus:ring-white"
             />
             <Button size="lg" variant="secondary" className="whitespace-nowrap">
               Đăng ký ngay

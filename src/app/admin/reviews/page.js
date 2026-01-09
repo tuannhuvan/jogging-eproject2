@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý đánh giá sản phẩm
 export default function ReviewsPage() {
   const columns = [
     { key: 'user_name', label: 'Người đánh giá' },

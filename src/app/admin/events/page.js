@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý sự kiện và giải chạy
 export default function EventsPage() {
   const columns = [
     { key: 'title', label: 'Tên giải chạy' },

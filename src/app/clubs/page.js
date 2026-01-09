@@ -20,6 +20,7 @@ import {
 import { api } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 
+// Trang câu lạc bộ chạy bộ
 export default function ClubsPage() {
   const [clubs, setClubs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -35,10 +36,12 @@ export default function ClubsPage() {
     image_url: ''
   })
 
+  // Tải dữ liệu câu lạc bộ khi component được gắn kết
   useEffect(() => {
     fetchClubs()
   }, [])
 
+  // Hàm tải câu lạc bộ từ API
   async function fetchClubs() {
     setLoading(true)
     try {
@@ -51,6 +54,7 @@ export default function ClubsPage() {
     }
   }
 
+  // Hàm xử lý tạo câu lạc bộ mới
   const handleCreateClub = async (e) => {
     e.preventDefault()
     setCreating(true)
@@ -85,12 +89,14 @@ export default function ClubsPage() {
     }
   }
 
+  // Lọc câu lạc bộ dựa trên từ khóa tìm kiếm
   const filteredClubs = clubs.filter(club => 
     club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     club.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     club.location?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  // Hiển thị nội dung trang câu lạc bộ
   return (
     <div className="min-h-screen bg-muted/30 pb-20">
       {/* Hero Section */}

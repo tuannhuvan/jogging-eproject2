@@ -13,6 +13,7 @@ import { useCart } from '@/lib/cart-context'
 import { useAuth } from '@/lib/auth-context'
 import { toast } from 'sonner'
 
+// Trang chi tiết sản phẩm
 export default function ProductDetailPage() {
   const params = useParams()
   const { user, profile } = useAuth()
@@ -26,6 +27,7 @@ export default function ProductDetailPage() {
   const [submitting, setSubmitting] = useState(false)
   const [hasPurchased, setHasPurchased] = useState(false)
 
+  // Tải dữ liệu sản phẩm và đánh giá khi component được gắn kết hoặc khi slug thay đổi
   useEffect(() => {
     async function fetchProduct() {
       try {
@@ -37,8 +39,8 @@ export default function ProductDetailPage() {
           const reviewsData = await api.getReviews({ product_id: data.id })
           if (reviewsData) setReviews(reviewsData)
 
-          // In a real PHP migration, we would call an endpoint for this
-          // For now, we simulate or assume the user wants this feature through PHP too
+          // trong trường hợp bạn muốn kiểm tra xem người dùng đã mua sản phẩm này chưa
+          // thì bạn có thể thêm logic ở đây để kiểm tra đơn hàng của người dùng
           // setHasPurchased(...) 
         }
         setLoading(false)
@@ -47,9 +49,11 @@ export default function ProductDetailPage() {
         setLoading(false)
       }
     }
+    // gọi hàm tải sản phẩm
     fetchProduct()
   }, [params.slug, user])
 
+  // Hàm xử lý thêm sản phẩm vào giỏ hàng
   function handleAddToCart() {
     if (!product) return
     for (let i = 0; i < quantity; i++) {
@@ -63,6 +67,7 @@ export default function ProductDetailPage() {
     toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`)
   }
 
+  // Hàm xử lý gửi đánh giá
   async function handleSubmitReview(e) {
     e.preventDefault()
     if (!user || !profile || !product) return
@@ -91,10 +96,12 @@ export default function ProductDetailPage() {
     setSubmitting(false)
   }
 
+  // Tính điểm đánh giá trung bình
   const averageRating = reviews.length > 0
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
     : 5
 
+  // Hiển thị trạng thái tải hoặc lỗi
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -113,6 +120,7 @@ export default function ProductDetailPage() {
     )
   }
 
+  // Nếu không tìm thấy sản phẩm
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
@@ -124,6 +132,7 @@ export default function ProductDetailPage() {
     )
   }
 
+  // Hiển thị chi tiết sản phẩm
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">

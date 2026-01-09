@@ -28,6 +28,7 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
+// Trang bảng điều khiển nhà cung cấp
 export default function SupplierDashboard() {
   const router = useRouter()
   const { user, profile, loading: authLoading } = useAuth()
@@ -47,17 +48,20 @@ export default function SupplierDashboard() {
     category_id: ''
   })
 
+  // Kiểm tra quyền truy cập và tải dữ liệu khi component được gắn kết
   useEffect(() => {
     if (!authLoading && (!user || profile?.role !== 'supplier')) {
       router.push('/')
       return
     }
 
+    // Tải sản phẩm và danh mục nếu là nhà cung cấp
     if (user && profile?.role === 'supplier') {
       fetchData()
     }
   }, [user, profile, authLoading, router])
 
+  // Hàm tải sản phẩm và danh mục từ database
   async function fetchData() {
     const [productsRes, categoriesRes] = await Promise.all([
       supabase.from('products').select('*').eq('supplier_id', user.id).order('created_at', { ascending: false }),
@@ -68,16 +72,18 @@ export default function SupplierDashboard() {
     setLoading(false)
   }
 
+  // Hàm tạo slug từ tên sản phẩm
   function generateSlug(name) {
     return name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
+      .toLowerCase() // Chuyển thành chữ thường
+      .normalize('NFD') // Chuẩn hóa Unicode
+      .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
+      .replace(/đ/g, 'd') // Thay thế đ thành d
+      .replace(/[^a-z0-9]+/g, '-') // Thay ký tự không phải chữ/ số thành dấu -
+      .replace(/(^-|-$)/g, '') // Loại bỏ dấu - ở đầu và cuối
   }
 
+  // Hàm đặt lại form
   function resetForm() {
     setFormData({
       name: '',
@@ -92,6 +98,7 @@ export default function SupplierDashboard() {
     setEditingProduct(null)
   }
 
+  // Hàm mở hộp thoại chỉnh sửa sản phẩm
   function openEditDialog(product) {
     setEditingProduct(product)
     setFormData({
@@ -107,6 +114,7 @@ export default function SupplierDashboard() {
     setIsDialogOpen(true)
   }
 
+  // Hàm xử lý gửi form thêm/ sửa sản phẩm
   async function handleSubmit(e) {
     e.preventDefault()
     
@@ -122,6 +130,7 @@ export default function SupplierDashboard() {
       supplier_id: user.id
     }
 
+    // Thêm hoặc cập nhật sản phẩm
     if (editingProduct) {
       const { error } = await supabase
         .from('products')
@@ -129,6 +138,7 @@ export default function SupplierDashboard() {
         .eq('id', editingProduct.id)
         .eq('supplier_id', user.id)
       
+      // Xử lý kết quả  
       if (error) {
         toast.error('Không thể cập nhật sản phẩm')
       } else {
@@ -151,6 +161,7 @@ export default function SupplierDashboard() {
     }
   }
 
+  // Hàm xử lý xóa sản phẩm
   async function handleDelete(id) {
     if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return
 
@@ -168,6 +179,7 @@ export default function SupplierDashboard() {
     }
   }
 
+  // Hiển thị trạng thái tải dữ liệu
   if (authLoading || loading) {
     return (
       <div className="min-h-screen py-8">
@@ -181,6 +193,7 @@ export default function SupplierDashboard() {
     )
   }
 
+  // Hiển thị giao diện bảng điều khiển nhà cung cấp
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">

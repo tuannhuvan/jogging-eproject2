@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+// Nôi dung chính của trang cửa hàng
 function ShopContent() {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get('category')
@@ -28,6 +29,7 @@ function ShopContent() {
   const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
 
+  // Tải dữ liệu sản phẩm và danh mục khi component được gắn kết
   useEffect(() => {
     async function fetchData() {
       try {
@@ -46,6 +48,7 @@ function ShopContent() {
     fetchData()
   }, [])
 
+  // Lọc và sắp xếp sản phẩm dựa trên danh mục đã chọn và tiêu chí sắp xếp
   const filteredProducts = products
     .filter(p => {
       if (selectedCategory === 'all') return true
@@ -64,6 +67,7 @@ function ShopContent() {
       }
     })
 
+  // Hàm xử lý thêm sản phẩm vào giỏ hàng
   function handleAddToCart(product) {
     addItem({
       id: product.id,
@@ -198,6 +202,7 @@ function ShopContent() {
   )
 }
 
+// Trang cửa hàng với Suspense để tải nội dung chính
 export default function ShopPage() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Đang tải...</div>}>

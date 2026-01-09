@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý tin tức và blog
 export default function PostsPage() {
   const columns = [
     { key: 'title', label: 'Tiêu đề bài viết' },

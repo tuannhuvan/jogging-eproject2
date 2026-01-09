@@ -8,12 +8,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
+// Trang kiến thức chạy bộ
 export default function BaiVietPage() {
   const [posts, setPosts] = useState([])
   const [categories, setCategories] = useState([])
   const [activeCategory, setActiveCategory] = useState('all')
   const [loading, setLoading] = useState(true)
 
+  // Tải dữ liệu bài viết và danh mục khi component được gắn kết
   useEffect(() => {
     async function fetchData() {
       try {
@@ -29,9 +31,11 @@ export default function BaiVietPage() {
         setLoading(false)
       }
     }
+// Gọi hàm fetchData để tải dữ liệu
     fetchData()
   }, [])
 
+  // Lọc bài viết theo danh mục đang chọn
   const filteredPosts = activeCategory === 'all' 
     ? posts 
     : posts.filter(p => p.category_id === parseInt(activeCategory))

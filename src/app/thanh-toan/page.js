@@ -15,6 +15,7 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
+// Trang thanh toán
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, totalAmount, clearCart } = useCart()
@@ -28,16 +29,19 @@ export default function CheckoutPage() {
     note: ''
   })
 
+  // Chuyển hướng nếu người dùng chưa đăng nhập hoặc giỏ hàng trống
   if (!user) {
     router.push('/dang-nhap')
     return null
   }
 
+  // Chuyển hướng nếu giỏ hàng trống và chưa thành công
   if (items.length === 0 && !success) {
     router.push('/cart')
     return null
   }
 
+  // Hàm xử lý gửi đơn hàng
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
@@ -54,12 +58,14 @@ export default function CheckoutPage() {
       .select()
       .single()
 
+    // Xử lý lỗi khi không thể tạo đơn hàng
     if (orderError || !orderData) {
       toast.error('Không thể tạo đơn hàng')
       setLoading(false)
       return
     }
 
+    // Thêm các mục vào đơn hàng
     const orderItems = items.map(item => ({
       order_id: orderData.id,
       product_id: item.id,
@@ -83,6 +89,7 @@ export default function CheckoutPage() {
     setLoading(false)
   }
 
+  // Hiển thị trang thành công sau khi đặt hàng
   if (success) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4">

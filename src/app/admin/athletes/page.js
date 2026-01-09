@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý vận động viên
 export default function AthletesPage() {
   const columns = [
     { key: 'full_name', label: 'Tên vận động viên' },

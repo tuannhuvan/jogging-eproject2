@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý đăng ký tham gia sự kiện
 export default function RegistrationsPage() {
   const columns = [
     { key: 'athlete_name', label: 'Vận động viên' },
