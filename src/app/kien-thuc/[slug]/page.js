@@ -86,12 +86,12 @@ export default function PostDetailPage() {
     )
   }
 
-    if (!post) {
+  if (!post) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Không tìm thấy bài viết</h1>
+        <h1 className="text-2xl font-bold mb-4">Không tìm thấy kiến thức</h1>
         <Link href="/kien-thuc">
-          <Button>Quay lại kiến thức chạy bộ</Button>
+          <Button>Quay lại danh sách kiến thức</Button>
         </Link>
       </div>
     )

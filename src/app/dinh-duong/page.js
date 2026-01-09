@@ -111,9 +111,9 @@ export default function DinhDuongPage() {
               <p className="text-muted-foreground">Chưa có bài viết nào về dinh dưỡng.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map((post, index) => (
-                <Link key={post.id} href={`/bai-viet/${post.slug}`} className="group">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {posts.map((post, index) => (
+                  <Link key={post.id} href={`/kien-thuc/${post.slug}`} className="group">
                   <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in h-full" style={{ animationDelay: `${index * 50}ms` }}>
                     <div className="relative h-48 overflow-hidden">
                       <Image

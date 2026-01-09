@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, ChevronLeft, ChevronRight, Star, ShoppingBag, BookOpen, Apple } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Star, ShoppingBag, BookOpen, Apple, Calendar, MapPin, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { api } from '@/lib/api'
@@ -13,7 +13,7 @@ const bannerSlides = [
     title: "Khám phá thế giới chạy bộ",
     subtitle: "Kiến thức - Kỹ thuật - Trang thiết bị",
     image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=1600",
-    cta: { text: "Khám phá ngay", href: "/bai-viet" }
+    cta: { text: "Khám phá ngay", href: "/kien-thuc" }
   },
   {
     title: "Bộ sưu tập giày chạy 2024",
@@ -33,6 +33,7 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [posts, setPosts] = useState([])
   const [products, setProducts] = useState([])
+  const [events, setEvents] = useState([])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,12 +45,14 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [postsRes, productsRes] = await Promise.all([
+        const [postsRes, productsRes, eventsRes] = await Promise.all([
           api.getPosts({ is_featured: 'true', limit: 3 }),
-          api.getProducts({ is_featured: 'true', limit: 4 })
+          api.getProducts({ is_featured: 'true', limit: 4 }),
+          api.getEvents()
         ])
         if (postsRes) setPosts(postsRes)
         if (productsRes) setProducts(productsRes)
+        if (eventsRes) setEvents(eventsRes.filter(e => e.status === 'Open').slice(0, 3))
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -125,45 +128,73 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 bg-gradient-to-b from-secondary/30 to-background">
+      <section className="py-16 bg-[#F9FAFB]">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link href="/bai-viet" className="group">
-              <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-primary/20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <Link href="/events" className="group">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <BookOpen className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Calendar className="w-8 h-8 text-blue-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Tư vấn & Bài viết</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Kỹ thuật chạy chuyên nghiệp và hướng dẫn cho người mới bắt đầu
+                  <h3 className="text-xl font-bold mb-2">Sự kiện</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Khám phá và đăng ký các giải chạy bộ mới nhất
                   </p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/kien-thuc" className="group">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <BookOpen className="w-8 h-8 text-emerald-500" />
+                  </div>
+                    <h3 className="text-xl font-bold mb-2">Kiến thức chạy bộ</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Kỹ thuật chạy bộ, hướng dẫn luyện tập và kiến thức chuyên sâu từ chuyên gia
+                    </p>
                 </CardContent>
               </Card>
             </Link>
             
             <Link href="/dinh-duong" className="group">
-              <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-accent/20">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
-                    <Apple className="w-8 h-8 text-accent" />
+                  <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Apple className="w-8 h-8 text-rose-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Dinh dưỡng</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Chế độ ăn uống khoa học dành riêng cho vận động viên
+                  <h3 className="text-xl font-bold mb-2">Dinh dưỡng</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Chế độ ăn uống khoa học dành riêng cho Runner
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/clubs" className="group">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Users className="w-8 h-8 text-orange-500" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Cộng đồng</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Kết nối với các câu lạc bộ và những người cùng đam mê
                   </p>
                 </CardContent>
               </Card>
             </Link>
             
             <Link href="/shop" className="group">
-              <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-chart-3/20">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-chart-3/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-chart-3/20 transition-colors">
-                    <ShoppingBag className="w-8 h-8 text-chart-3" />
+                  <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <ShoppingBag className="w-8 h-8 text-teal-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Cửa hàng</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <h3 className="text-xl font-bold mb-2">Cửa hàng</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     Trang thiết bị chính hãng - Giày, quần áo, phụ kiện
                   </p>
                 </CardContent>
@@ -173,14 +204,67 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16">
+      {events.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold">Sự kiện sắp tới</h2>
+                <p className="text-muted-foreground mt-1">Các giải chạy không thể bỏ lỡ</p>
+              </div>
+              <Link href="/events">
+                <Button variant="outline" className="gap-2">
+                  Xem tất cả <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {events.map((event) => (
+                <Link key={event.id} href={`/events/${event.id}`} className="group">
+                  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                    <div className="relative h-48 overflow-hidden">
+                      <Image
+                        src={event.image_url || 'https://images.unsplash.com/photo-1547483100-3023e602446f?w=800'}
+                        alt={event.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary">
+                        Sắp diễn ra
+                      </div>
+                    </div>
+                    <CardContent className="p-5">
+                      <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-1">
+                        {event.name}
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="w-4 h-4" />
+                          <span>{new Date(event.date).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4" />
+                          <span>{event.location}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="py-16 bg-[#F9FAFB]">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold">Bài viết nổi bật</h2>
               <p className="text-muted-foreground mt-1">Kiến thức mới nhất về chạy bộ</p>
             </div>
-            <Link href="/bai-viet">
+            <Link href="/kien-thuc">
               <Button variant="outline" className="gap-2">
                 Xem tất cả <ArrowRight className="w-4 h-4" />
               </Button>
@@ -189,8 +273,8 @@ export default function HomePage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {posts.map((post, index) => (
-              <Link key={post.id} href={`/bai-viet/${post.slug}`} className="group">
-                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+              <Link key={post.id} href={`/kien-thuc/${post.slug}`} className="group">
+                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className="relative h-48 overflow-hidden">
                     <Image
                       src={post.image_url || 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800'}
@@ -215,7 +299,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 bg-muted/30">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -273,7 +357,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 bg-gradient-to-r from-primary to-accent text-white">
+      <section className="py-16 bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Tham gia cộng đồng Runner Việt Nam

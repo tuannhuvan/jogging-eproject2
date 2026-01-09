@@ -75,7 +75,7 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Điều hướng</h4>
             <ul className="space-y-2 text-sm text-white/70">
               <li><Link href="/" className="hover:text-primary transition-colors">Trang chủ</Link></li>
-              <li><Link href="/bai-viet" className="hover:text-primary transition-colors">Tư vấn & Bài viết</Link></li>
+                <li><Link href="/kien-thuc" className="hover:text-primary transition-colors">Kiến thức chạy bộ</Link></li>
               <li><Link href="/dinh-duong" className="hover:text-primary transition-colors">Dinh dưỡng</Link></li>
               <li><Link href="/shop" className="hover:text-primary transition-colors">Cửa hàng</Link></li>
             </ul>
