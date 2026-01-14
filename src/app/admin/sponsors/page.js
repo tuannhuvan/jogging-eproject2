@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý nhà tài trợ
 export default function SponsorsPage() {
   const columns = [
     { key: 'name', label: 'Tên nhà tài trợ' },

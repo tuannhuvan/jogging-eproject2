@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
+// Cấu hình trạng thái đơn hàng
 const statusConfig = {
   pending: { label: 'Chờ xác nhận', color: 'bg-yellow-500', icon: Clock },
   confirmed: { label: 'Đã xác nhận', color: 'bg-blue-500', icon: CheckCircle },
@@ -17,18 +18,21 @@ const statusConfig = {
   cancelled: { label: 'Đã hủy', color: 'bg-red-500', icon: XCircle }
 }
 
+// Trang đơn hàng của người dùng
 export default function OrdersPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
 
+  // Tải dữ liệu đơn hàng khi component được gắn kết
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/dang-nhap')
       return
     }
 
+    // Nếu đã đăng nhập, tải đơn hàng của người dùng
     if (user) {
       async function fetchOrders() {
         const { data } = await supabase
@@ -44,6 +48,7 @@ export default function OrdersPage() {
     }
   }, [user, authLoading, router])
 
+  // Hiển thị trạng thái tải dữ liệu
   if (authLoading || loading) {
     return (
       <div className="min-h-screen py-8">
@@ -59,6 +64,7 @@ export default function OrdersPage() {
     )
   }
 
+  // Hiển thị nội dung trang đơn hàng
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">

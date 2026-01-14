@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Search, Globe, Share2 } from 'lucide-react'
 
+// Trang phân tích và cấu hình SEO
 export default function SEOPage() {
   const [seo, setSeo] = useState({
     title: 'Cổng thông tin chạy bộ - Giải chạy marathon toàn quốc',

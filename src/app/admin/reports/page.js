@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
 import { PieChart, Pie, Cell } from 'recharts'
 
+// Trang báo cáo thống kê cho admin
 export default function ReportsPage() {
   const [stats, setStats] = useState({
     registrations: [],

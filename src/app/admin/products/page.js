@@ -28,6 +28,7 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
+// Trang quản lý sản phẩm trong admin panel
 export default function AdminProductsPage() {
   const router = useRouter()
   const { user, profile, loading: authLoading } = useAuth()
@@ -48,6 +49,7 @@ export default function AdminProductsPage() {
     is_featured: false
   })
 
+  // Kiểm tra quyền truy cập khi component được gắn kết
   useEffect(() => {
     if (!authLoading && (!user || profile?.role !== 'admin')) {
       router.push('/')
@@ -69,6 +71,7 @@ export default function AdminProductsPage() {
     setLoading(false)
   }
 
+  // Hàm tạo slug từ tên sản phẩm
   function generateSlug(name) {
     return name
       .toLowerCase()
@@ -79,6 +82,7 @@ export default function AdminProductsPage() {
       .replace(/(^-|-$)/g, '')
   }
 
+  // Hàm đặt lại form và trạng thái chỉnh sửa
   function resetForm() {
     setFormData({
       name: '',
@@ -94,6 +98,7 @@ export default function AdminProductsPage() {
     setEditingProduct(null)
   }
 
+  // Mở dialog chỉnh sửa với dữ liệu sản phẩm đã chọn
   function openEditDialog(product) {
     setEditingProduct(product)
     setFormData({
@@ -110,6 +115,7 @@ export default function AdminProductsPage() {
     setIsDialogOpen(true)
   }
 
+  // Hàm xử lý gửi form thêm/chỉnh sửa sản phẩm
   async function handleSubmit(e) {
     e.preventDefault()
     
@@ -153,6 +159,7 @@ export default function AdminProductsPage() {
     }
   }
 
+  // Hàm xử lý xóa sản phẩm
   async function handleDelete(id) {
     if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return
 
@@ -179,6 +186,7 @@ export default function AdminProductsPage() {
     )
   }
 
+  // Hiển thị nội dung trang quản lý sản phẩm
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">

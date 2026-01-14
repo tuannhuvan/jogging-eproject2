@@ -7,10 +7,12 @@ import { api } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Play } from 'lucide-react'
 
+// Trang dinh dưỡng cho runner
 export default function DinhDuongPage() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
+  // Tải dữ liệu bài viết về dinh dưỡng khi component được gắn kết
   useEffect(() => {
     async function fetchData() {
       try {
@@ -28,6 +30,7 @@ export default function DinhDuongPage() {
     fetchData()
   }, [])
 
+  // Dữ liệu video hướng dẫn (cố định cho ví dụ)
   const videos = [
     {
       id: 1,
@@ -49,6 +52,7 @@ export default function DinhDuongPage() {
     }
   ]
 
+  // Hiển thị nội dung trang dinh dưỡng
   return (
     <div className="min-h-screen">
       <div className="bg-gradient-to-r from-accent to-accent/80 text-white py-16">

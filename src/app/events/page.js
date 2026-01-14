@@ -9,11 +9,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 
+// Trang sự kiện và giải chạy
 export default function EventsPage() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
 
+  // Tải dữ liệu sự kiện khi component được gắn kết
   useEffect(() => {
     async function fetchEvents() {
       try {
@@ -28,11 +30,13 @@ export default function EventsPage() {
     fetchEvents()
   }, [])
 
+  // Lọc sự kiện dựa trên từ khóa tìm kiếm
   const filteredEvents = events.filter(event => 
     event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.location.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  // Hiển thị nội dung trang sự kiện
   return (
     <div className="min-h-screen bg-muted/30 pb-20">
       {/* Hero Section */}

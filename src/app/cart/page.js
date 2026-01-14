@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useCart } from '@/lib/cart-context'
 import { useAuth } from '@/lib/auth-context'
 
+// Trang giỏ hàng
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalAmount, clearCart } = useCart()
   const { user } = useAuth()
@@ -28,6 +29,7 @@ export default function CartPage() {
     )
   }
 
+  // Hiển thị nội dung trang giỏ hàng
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">

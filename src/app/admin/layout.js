@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/lib/auth-context'
 
+// Định nghĩa các mục menu cho sidebar admin
 const menuItems = [
   { icon: LayoutDashboard, label: 'Bảng tin', href: '/admin' },
   { icon: Calendar, label: 'Sự kiện & Giải chạy', href: '/admin/events', hasSub: true },
@@ -46,6 +47,7 @@ const menuItems = [
   { icon: Settings, label: 'Cài đặt hệ thống', href: '/admin/settings', hasSub: true },
 ]
 
+// Bố cục chính cho trang admin
 export default function AdminLayout({ children }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -53,11 +55,13 @@ export default function AdminLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [currentTime, setCurrentTime] = useState(new Date())
 
+  // Cập nhật thời gian hiện tại mỗi giây
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
+  // Chuyển hướng nếu người dùng không phải admin
   useEffect(() => {
     if (!loading && (!profile || profile.role !== 'admin')) {
       router.push('/dang-nhap')
@@ -68,6 +72,7 @@ export default function AdminLayout({ children }) {
     return <div className="min-h-screen flex items-center justify-center">Đang tải...</div>
   }
 
+  // Định dạng thời gian hiển thị trong header
   const formattedTime = currentTime.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
     minute: '2-digit',

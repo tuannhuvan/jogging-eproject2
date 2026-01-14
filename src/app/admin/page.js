@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
+// Trang bảng điều khiển quản trị
 export default function AdminDashboard() {
   const router = useRouter()
   const { user, profile, loading: authLoading } = useAuth()
@@ -19,6 +20,7 @@ export default function AdminDashboard() {
     reviews: 0
   })
 
+  // Chuyển hướng nếu người dùng không phải admin và tải số liệu thống kê
   useEffect(() => {
     if (!authLoading && (!user || profile?.role !== 'admin')) {
       router.push('/')

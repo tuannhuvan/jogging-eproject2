@@ -2,6 +2,7 @@
 
 import { AdminTable } from '@/components/admin-table'
 
+// Trang quản lý câu lạc bộ
 export default function ClubsPage() {
   const columns = [
     { key: 'name', label: 'Tên câu lạc bộ' },

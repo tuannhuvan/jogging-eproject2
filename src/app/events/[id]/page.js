@@ -14,6 +14,7 @@ import { useAuth } from '@/lib/auth-context'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 
+// Trang chi tiết sự kiện và giải chạy
 export default function EventDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -26,13 +27,15 @@ export default function EventDetailPage() {
   const [paymentStatus, setPaymentStatus] = useState(null)
   const [registration, setRegistration] = useState(null)
   const [cancelling, setCancelling] = useState(false)
-  
+
+  // Dữ liệu biểu mẫu đăng ký
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
     distance: '5km'
   })
 
+  // Hàm lấy giá dựa trên cự ly đã chọn
   const getPrice = (distance) => {
     if (!event) return 0;
     switch(distance) {
@@ -44,6 +47,7 @@ export default function EventDetailPage() {
     }
   }
 
+  // Xử lý trạng thái thanh toán từ tham số URL
   useEffect(() => {
     const payment = searchParams.get('payment')
     if (payment === 'success') {
@@ -55,6 +59,7 @@ export default function EventDetailPage() {
     }
   }, [searchParams])
 
+  // Tải dữ liệu chi tiết sự kiện và trạng thái đăng ký khi component được gắn kết
   useEffect(() => {
     async function fetchData() {
       try {
@@ -91,6 +96,7 @@ export default function EventDetailPage() {
     }
   }, [params.id, user, profile, authLoading])
 
+  // Hàm xử lý hủy đăng ký
   async function handleCancelRegistration() {
     if (!registration || registration.payment_status === 'paid') return
     
@@ -108,6 +114,7 @@ export default function EventDetailPage() {
     setCancelling(false)
   }
 
+  // Hàm xử lý đăng ký sự kiện
   async function handleRegister(e) {
     e.preventDefault()
     if (!user) {
@@ -116,6 +123,7 @@ export default function EventDetailPage() {
       return
     }
 
+    // Kiểm tra thông tin biểu mẫu
     setRegistering(true)
     try {
       const result = await api.postData('create_registration.php', {
@@ -157,6 +165,7 @@ export default function EventDetailPage() {
     }
   }
 
+  // Hàm xử lý thanh toán
   async function handlePayment() {
     if (!registration) return
     
@@ -187,6 +196,7 @@ export default function EventDetailPage() {
     setRegistering(false)
   }
 
+  // Hiển thị trạng thái tải dữ liệu
   if (loading || authLoading) {
     return (
       <div className="container mx-auto px-4 py-12 flex flex-col items-center">
@@ -203,6 +213,7 @@ export default function EventDetailPage() {
     )
   }
 
+  // Hiển thị nếu không tìm thấy sự kiện
   if (!event) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
@@ -215,6 +226,7 @@ export default function EventDetailPage() {
     )
   }
 
+  // Hiển thị nội dung chi tiết sự kiện
   return (
     <div className="min-h-screen bg-secondary/5 pb-20">
       {/* Hero Header */}
