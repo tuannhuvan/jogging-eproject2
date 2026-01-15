@@ -1,25 +1,42 @@
 "use client"
 
+/**
+ * ADMIN SETTINGS PAGE - Trang cài đặt hệ thống
+ * 
+ * Trang này cho phép admin cấu hình các thiết lập chung của hệ thống:
+ * - Tên cổng thông tin
+ * - Email liên hệ
+ * - Bật/tắt chức năng đăng ký mới
+ * - Bật/tắt chế độ bảo trì
+ */
+
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 
-// Trang cài đặt hệ thống cho admin
+/**
+ * Component trang cài đặt hệ thống
+ * Hiển thị form cấu hình các thiết lập chung
+ */
 export default function SettingsPage() {
+  // State lưu các thiết lập hệ thống
   const [settings, setSettings] = useState({
-    siteName: 'Jogging Portal',
-    contactEmail: 'admin@jogging.com',
-    enableRegistration: true,
-    maintenanceMode: false
+    siteName: 'Jogging Portal',       // Tên cổng thông tin
+    contactEmail: 'admin@jogging.com', // Email liên hệ
+    enableRegistration: true,          // Cho phép đăng ký mới
+    maintenanceMode: false             // Chế độ bảo trì
   })
 
   return (
     <div className="max-w-2xl space-y-8">
+      {/* Tiêu đề trang */}
       <h2 className="text-xl font-semibold">Cài đặt hệ thống</h2>
       
+      {/* Form cài đặt */}
       <div className="bg-white p-6 rounded-lg shadow space-y-6">
+        {/* Trường: Tên cổng thông tin */}
         <div className="space-y-2">
           <Label>Tên cổng thông tin</Label>
           <Input 
@@ -28,6 +45,7 @@ export default function SettingsPage() {
           />
         </div>
 
+        {/* Trường: Email liên hệ */}
         <div className="space-y-2">
           <Label>Email liên hệ</Label>
           <Input 
@@ -37,6 +55,7 @@ export default function SettingsPage() {
           />
         </div>
 
+        {/* Toggle: Cho phép đăng ký mới */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Cho phép đăng ký mới</Label>
@@ -48,6 +67,7 @@ export default function SettingsPage() {
           />
         </div>
 
+        {/* Toggle: Chế độ bảo trì */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Chế độ bảo trì</Label>
@@ -59,6 +79,7 @@ export default function SettingsPage() {
           />
         </div>
 
+        {/* Nút lưu cấu hình */}
         <Button className="w-full bg-blue-600 hover:bg-blue-700">Lưu cấu hình</Button>
       </div>
     </div>

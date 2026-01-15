@@ -7,8 +7,13 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
+// Về cơ bản, carousel (hay còn gọi là slider, slideshow) là một thành phần giao diện người dùng (UI element) 
+// có chức năng trình chiếu một chuỗi các nội dung theo dạng xoay vòng
+// Context để chia sẻ state và methods giữa các component con của Carousel
 const CarouselContext = React.createContext(null)
 
+// Hook để sử dụng carousel context
+// Phải được sử dụng bên trong Carousel component
 function useCarousel() {
   const context = React.useContext(CarouselContext)
 
@@ -19,6 +24,12 @@ function useCarousel() {
   return context
 }
 
+// Carousel - component slideshow sử dụng Embla Carousel
+// Props:
+// - orientation: hướng cuộn (horizontal/vertical)
+// - opts: các tùy chọn của Embla Carousel
+// - setApi: callback để nhận Embla API instance
+// - plugins: các plugin mở rộng
 function Carousel({
   orientation = "horizontal",
   opts,
@@ -35,23 +46,28 @@ function Carousel({
     },
     plugins
   )
+  // State theo dõi khả năng cuộn trang trước/sau
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
   const [canScrollNext, setCanScrollNext] = React.useState(false)
 
+  // Cập nhật state khi slide thay đổi
   const onSelect = React.useCallback((api) => {
     if (!api) return
     setCanScrollPrev(api.canScrollPrev())
     setCanScrollNext(api.canScrollNext())
   }, [])
 
+  // Hàm cuộn đến slide trước
   const scrollPrev = React.useCallback(() => {
     api?.scrollPrev()
   }, [api])
 
+  // Hàm cuộn đến slide sau
   const scrollNext = React.useCallback(() => {
     api?.scrollNext()
   }, [api])
 
+  // Xử lý điều hướng bằng phím mũi tên
   const handleKeyDown = React.useCallback(
     (event) => {
       if (event.key === "ArrowLeft") {
@@ -65,11 +81,13 @@ function Carousel({
     [scrollPrev, scrollNext]
   )
 
+  // Truyền API ra ngoài nếu có setApi callback
   React.useEffect(() => {
     if (!api || !setApi) return
     setApi(api)
   }, [api, setApi])
 
+  // Đăng ký event listeners khi carousel init
   React.useEffect(() => {
     if (!api) return
     onSelect(api)
@@ -109,6 +127,7 @@ function Carousel({
   )
 }
 
+// CarouselContent - container chứa các slide
 function CarouselContent({ className, ...props }) {
   const { carouselRef, orientation } = useCarousel()
 
@@ -130,6 +149,7 @@ function CarouselContent({ className, ...props }) {
   )
 }
 
+// CarouselItem - mỗi slide trong carousel
 function CarouselItem({ className, ...props }) {
   const { orientation } = useCarousel()
 
@@ -148,6 +168,7 @@ function CarouselItem({ className, ...props }) {
   )
 }
 
+// CarouselPrevious - nút điều hướng đến slide trước
 function CarouselPrevious({
   className,
   variant = "outline",
@@ -178,6 +199,7 @@ function CarouselPrevious({
   )
 }
 
+// CarouselNext - nút điều hướng đến slide sau
 function CarouselNext({
   className,
   variant = "outline",

@@ -3,10 +3,13 @@ import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
 
+// Định nghĩa theme cho chart (light/dark)
 const THEMES = { light: "", dark: ".dark" }
 
+// Context chia sẻ cấu hình chart giữa các component
 const ChartContext = React.createContext(null)
 
+// Hook để truy cập chart context
 function useChart() {
   const context = React.useContext(ChartContext)
   if (!context) {
@@ -15,6 +18,12 @@ function useChart() {
   return context
 }
 
+// Sơ đồ luồng giao diện (UI Flow Charts) là biểu đồ trực quan mô tả các màn hình (UI screens) 
+// và cách chúng kết nối với nhau trong sản phẩm, giúp hình dung hành trình người dùng và luồng tương tác
+// ChartContainer - container chính cho biểu đồ
+// Props:
+// - config: cấu hình màu sắc và label cho các data series
+// - id: id để áp dụng CSS custom properties
 function ChartContainer({ id, className, children, config, ...props }) {
   const chartId = React.useId()
   const idToUse = id || chartId
@@ -38,6 +47,8 @@ function ChartContainer({ id, className, children, config, ...props }) {
   )
 }
 
+// ChartStyle - component inject CSS custom properties cho màu sắc chart
+// Tự động tạo CSS cho cả light và dark theme
 function ChartStyle({ id, config }) {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
@@ -69,8 +80,16 @@ ${colorConfig
   )
 }
 
+// ChartTooltip - component tooltip của Recharts
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+// ChartTooltipContent - nội dung tooltip tùy chỉnh
+// Props:
+// - indicator: kiểu indicator (dot/line/dashed)
+// - hideLabel: ẩn label
+// - hideIndicator: ẩn indicator màu
+// - labelFormatter: hàm format label
+// - formatter: hàm format giá trị
 function ChartTooltipContent({
   active,
   payload,
@@ -88,6 +107,8 @@ function ChartTooltipContent({
   ...props
 }) {
   const { config } = useChart()
+  
+  // Tạo label cho tooltip
   const tooltipLabel = React.useMemo(() => {
     if (hideLabel || !payload?.length) {
       return null
@@ -119,10 +140,13 @@ function ChartTooltipContent({
     config,
     labelKey,
   ])
+  
   if (!active || !payload?.length) {
     return null
   }
+  
   const nestLabel = payload.length === 1 && indicator !== "dot"
+  
   return (
     <div
       className={cn(
@@ -203,8 +227,13 @@ function ChartTooltipContent({
   )
 }
 
+// ChartLegend - component legend của Recharts
 const ChartLegend = RechartsPrimitive.Legend
 
+// ChartLegendContent - nội dung legend tùy chỉnh
+// Props:
+// - hideIcon: ẩn icon màu
+// - verticalAlign: vị trí (top/bottom)
 function ChartLegendContent({
   className,
   hideIcon = false,
@@ -254,7 +283,7 @@ function ChartLegendContent({
   )
 }
 
-// Helper to extract item config from a payload.
+// Helper function để lấy config từ payload
 function getPayloadConfigFromPayload(config, payload, key) {
   if (typeof payload !== "object" || payload === null) {
     return undefined

@@ -5,6 +5,8 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
+// Avatar - container chính cho hình đại diện người dùng
+// Có dạng hình tròn với kích thước mặc định 32px (size-8)
 function Avatar({
   className,
   ...props
@@ -21,6 +23,8 @@ function Avatar({
   )
 }
 
+// AvatarImage - hình ảnh đại diện
+// Hiển thị ảnh với tỷ lệ vuông, tự động fit vào container
 function AvatarImage({
   className,
   ...props
@@ -34,6 +38,8 @@ function AvatarImage({
   )
 }
 
+// AvatarFallback - nội dung hiển thị khi ảnh chưa tải xong hoặc lỗi
+// Thường hiển thị chữ cái đầu của tên người dùng
 function AvatarFallback({
   className,
   ...props

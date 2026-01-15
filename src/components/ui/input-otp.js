@@ -3,6 +3,12 @@ import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { MinusIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+// InputOTP - component nhập mã OTP (One-Time Password)
+// Sử dụng thư viện input-otp làm nền tảng
+// Props:
+// - maxLength: số ký tự tối đa
+// - containerClassName: class cho container
 function InputOTP({
   className,
   containerClassName,
@@ -20,6 +26,8 @@ function InputOTP({
     />
   )
 }
+
+// InputOTPGroup - nhóm các slot OTP lại với nhau
 function InputOTPGroup({ className, ...props }) {
   return (
     <div
@@ -29,6 +37,10 @@ function InputOTPGroup({ className, ...props }) {
     />
   )
 }
+
+// InputOTPSlot - mỗi ô nhập một ký tự của mã OTP
+// Props:
+// - index: vị trí của slot trong OTP
 function InputOTPSlot({
   index,
   className,
@@ -36,6 +48,7 @@ function InputOTPSlot({
 }) {
   const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {}
+  
   return (
     <div
       data-slot="input-otp-slot"
@@ -47,6 +60,7 @@ function InputOTPSlot({
       {...props}
     >
       {char}
+      {/* Fake caret nhấp nháy khi slot đang active */}
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="animate-caret-blink bg-foreground h-4 w-px duration-1000" />
@@ -55,6 +69,8 @@ function InputOTPSlot({
     </div>
   )
 }
+
+// InputOTPSeparator - dấu phân cách giữa các nhóm slot (thường là dấu gạch ngang)
 function InputOTPSeparator({ ...props }) {
   return (
     <div data-slot="input-otp-separator" role="separator" {...props}>
@@ -62,4 +78,5 @@ function InputOTPSeparator({ ...props }) {
     </div>
   )
 }
+
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }

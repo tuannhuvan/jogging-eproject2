@@ -1,6 +1,11 @@
 "use client"
 import * as React from "react"
 import { cn } from "@/lib/utils"
+
+// Table - component bảng dữ liệu
+// Bao gồm container có scroll ngang khi nội dung tràn
+
+// Table - bảng chính với scroll container
 function Table({ className, ...props }) {
   return (
     <div
@@ -15,6 +20,8 @@ function Table({ className, ...props }) {
     </div>
   )
 }
+
+// TableHeader - phần header chứa tiêu đề các cột
 function TableHeader({ className, ...props }) {
   return (
     <thead
@@ -24,6 +31,8 @@ function TableHeader({ className, ...props }) {
     />
   )
 }
+
+// TableBody - phần body chứa các hàng dữ liệu
 function TableBody({ className, ...props }) {
   return (
     <tbody
@@ -33,6 +42,8 @@ function TableBody({ className, ...props }) {
     />
   )
 }
+
+// TableFooter - phần footer (tổng, pagination, etc.)
 function TableFooter({ className, ...props }) {
   return (
     <tfoot
@@ -45,6 +56,9 @@ function TableFooter({ className, ...props }) {
     />
   )
 }
+
+// TableRow - mỗi hàng trong bảng
+// Có highlight khi hover và khi được select
 function TableRow({ className, ...props }) {
   return (
     <tr
@@ -57,6 +71,8 @@ function TableRow({ className, ...props }) {
     />
   )
 }
+
+// TableHead - ô tiêu đề cột (trong TableHeader)
 function TableHead({ className, ...props }) {
   return (
     <th
@@ -69,6 +85,8 @@ function TableHead({ className, ...props }) {
     />
   )
 }
+
+// TableCell - ô dữ liệu (trong TableBody)
 function TableCell({ className, ...props }) {
   return (
     <td
@@ -81,6 +99,8 @@ function TableCell({ className, ...props }) {
     />
   )
 }
+
+// TableCaption - caption mô tả bảng (hiển thị ở dưới)
 function TableCaption({
   className,
   ...props
@@ -93,6 +113,7 @@ function TableCaption({
     />
   )
 }
+
 export {
   Table,
   TableHeader,

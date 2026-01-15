@@ -2,6 +2,14 @@
 import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "@/lib/utils"
+
+// Slider - thanh trượt chọn giá trị
+// Sử dụng Radix UI SliderPrimitive làm nền tảng
+// Props:
+// - min: giá trị nhỏ nhất (mặc định: 0)
+// - max: giá trị lớn nhất (mặc định: 100)
+// - value/defaultValue: có thể là số đơn hoặc mảng (range slider)
+// - orientation: hướng (horizontal/vertical)
 function Slider({
   className,
   defaultValue,
@@ -10,6 +18,7 @@ function Slider({
   max = 100,
   ...props
 }) {
+  // Tính toán số lượng thumbs cần render
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -19,6 +28,7 @@ function Slider({
           : [min, max],
     [value, defaultValue, min, max]
   )
+  
   return (
     <SliderPrimitive.Root
       data-slot="slider"
@@ -32,12 +42,14 @@ function Slider({
       )}
       {...props}
     >
+      {/* Track - đường nền của slider */}
       <SliderPrimitive.Track
         data-slot="slider-track"
         className={cn(
           "bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5"
         )}
       >
+        {/* Range - phần đã chọn (highlight) */}
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
@@ -45,6 +57,7 @@ function Slider({
           )}
         />
       </SliderPrimitive.Track>
+      {/* Thumbs - các núm kéo (1 hoặc 2 cho range slider) */}
       {Array.from({ length: _values.length }, (_, index) => (
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
@@ -55,4 +68,5 @@ function Slider({
     </SliderPrimitive.Root>
   )
 }
+
 export { Slider }

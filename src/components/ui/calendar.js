@@ -8,6 +8,17 @@ import {
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+
+// Calendar UI là một phần tử thiết kế trong các ứng dụng quản lý lịch trình, 
+// cho phép người dùng theo dõi và sắp xếp các sự kiện, nhiệm vụ, và thời gian.
+// Nó thường bao gồm các tính năng như điều khiển ngày, giao diện lưới, và các biểu tượng cho các loại nhiệm vụ
+// Calendar - component lịch chọn ngày sử dụng react-day-picker
+// Props:
+// - showOutsideDays: hiển thị ngày của tháng trước/sau (mặc định: true)
+// - captionLayout: cách hiển thị caption (label/dropdown)
+// - buttonVariant: kiểu nút điều hướng (mặc định: ghost)
+// - formatters: tùy chỉnh định dạng hiển thị
+// - components: tùy chỉnh các component con
 function Calendar({
   className,
   classNames,
@@ -30,11 +41,13 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
+        // Định dạng dropdown tháng (viết tắt)
         formatMonthDropdown: (date) =>
           date?.toLocaleString("default", { month: "short" }) ?? "",
         ...formatters,
       }}
       classNames={{
+        // Styling cho các phần tử của lịch
         root: cn("w-fit", defaultClassNames.root),
         months: cn(
           "flex gap-4 flex-col md:flex-row relative",
@@ -100,20 +113,24 @@ function Calendar({
             : "[&:first-child[data-selected=true]_button]:rounded-l-md",
           defaultClassNames.day
         ),
+        // Styling cho chế độ chọn khoảng ngày (range)
         range_start: cn(
           "rounded-l-md bg-accent",
           defaultClassNames.range_start
         ),
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
         range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
+        // Ngày hôm nay được highlight
         today: cn(
           "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
           defaultClassNames.today
         ),
+        // Ngày ngoài tháng hiện tại (mờ hơn)
         outside: cn(
           "text-muted-foreground aria-selected:text-muted-foreground",
           defaultClassNames.outside
         ),
+        // Ngày bị vô hiệu hóa
         disabled: cn(
           "text-muted-foreground opacity-50",
           defaultClassNames.disabled
@@ -122,6 +139,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
+        // Component gốc của lịch
         Root: ({ className, rootRef, ...props }) => {
           return (
             <div
@@ -132,6 +150,7 @@ function Calendar({
             />
           )
         },
+        // Icon mũi tên điều hướng
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
             return (
@@ -151,6 +170,7 @@ function Calendar({
           )
         },
         DayButton,
+        // Component hiển thị số tuần
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -166,6 +186,9 @@ function Calendar({
     />
   )
 }
+
+// CalendarDayButton - nút cho mỗi ngày trong lịch
+// Xử lý các trạng thái: selected, range_start, range_end, range_middle
 function CalendarDayButton({
   className,
   day,
@@ -174,9 +197,12 @@ function CalendarDayButton({
 }) {
   const defaultClassNames = getDefaultClassNames()
   const ref = React.useRef(null)
+  
+  // Tự động focus khi ngày được đánh dấu focused
   React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
+  
   return (
     <Button
       ref={ref}
@@ -201,4 +227,5 @@ function CalendarDayButton({
     />
   )
 }
+
 export { Calendar, CalendarDayButton }

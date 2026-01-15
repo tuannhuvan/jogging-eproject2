@@ -18,10 +18,45 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-// Nôi dung chính của trang cửa hàng
+// Dữ liệu mẫu cho hình ảnh nếu không có trong database
+const fallbackImages = {
+  product: [
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+    'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800',
+    'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800',
+    'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=800'
+  ]
+}
+
+// Hàm làm sạch URL hình ảnh để tránh lỗi từ visual editor loader
+function cleanImageUrl(url) {
+  if (!url) return '';
+  if (typeof url !== 'string') return url;
+  
+  if (url.startsWith('o-')) {
+    const httpIndex = url.indexOf('http');
+    const dataIndex = url.indexOf('data:');
+    
+    let startIndex = -1;
+    if (httpIndex !== -1 && dataIndex !== -1) {
+      startIndex = Math.min(httpIndex, dataIndex);
+    } else {
+      startIndex = Math.max(httpIndex, dataIndex);
+    }
+    
+    if (startIndex !== -1) {
+      return url.substring(startIndex);
+    }
+  }
+  return url;
+}
+
+// Nội dung chính của trang cửa hàng
 function ShopContent() {
   const searchParams = useSearchParams()
+  // Lấy danh mục từ URL (nếu có)
   const categoryParam = searchParams.get('category')
+  // Quản lý trạng thái sản phẩm, danh mục, danh mục đang chọn, sắp xếp và trạng thái tải
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(categoryParam || 'all')
@@ -29,10 +64,11 @@ function ShopContent() {
   const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
 
-  // Tải dữ liệu sản phẩm và danh mục khi component được gắn kết
+  // Tải dữ liệu sản phẩm và danh mục sản phẩm từ API khi component được gắn kết (mount)
   useEffect(() => {
     async function fetchData() {
       try {
+        // Tải song song danh sách sản phẩm và danh mục loại 'product'
         const [productsRes, categoriesRes] = await Promise.all([
           api.getProducts(),
           api.getCategories({ type: 'product' })
@@ -41,14 +77,14 @@ function ShopContent() {
         if (categoriesRes) setCategories(categoriesRes)
         setLoading(false)
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Lỗi khi tải dữ liệu cửa hàng:', error)
         setLoading(false)
       }
     }
     fetchData()
   }, [])
 
-  // Lọc và sắp xếp sản phẩm dựa trên danh mục đã chọn và tiêu chí sắp xếp
+  // Xử lý lọc sản phẩm theo danh mục và sắp xếp theo các tiêu chí (giá, mới nhất)
   const filteredProducts = products
     .filter(p => {
       if (selectedCategory === 'all') return true
@@ -57,17 +93,17 @@ function ShopContent() {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'price-asc':
+        case 'price-asc': // Giá tăng dần
           return a.price - b.price
-        case 'price-desc':
+        case 'price-desc': // Giá giảm dần
           return b.price - a.price
-        case 'newest':
+        case 'newest': // Mới nhất lên đầu
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       }
     })
 
-  // Hàm xử lý thêm sản phẩm vào giỏ hàng
+  // Hàm xử lý thêm sản phẩm vào giỏ hàng và hiển thị thông báo
   function handleAddToCart(product) {
     addItem({
       id: product.id,
@@ -75,23 +111,27 @@ function ShopContent() {
       price: product.price,
       image_url: product.image_url
     })
-    toast.success('Đã thêm vào giỏ hàng')
+    toast.success('Đã thêm sản phẩm vào giỏ hàng')
   }
 
+  // Giao diện hiển thị trang cửa hàng
   return (
     <div className="min-h-screen">
+      {/* Phần tiêu đề cửa hàng (Hero Section) */}
       <div className="bg-gradient-to-r from-chart-3 to-chart-3/80 text-white py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Cửa hàng</h1>
+          <h1 className="text-4xl font-bold mb-4">Cửa hàng trang bị</h1>
           <p className="text-xl text-white/90">
-            Trang thiết bị chạy bộ chính hãng
+            Trang thiết bị, phụ kiện chạy bộ chính hãng và chất lượng
           </p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Bộ lọc theo danh mục và sắp xếp */}
         <div className="flex flex-col md:flex-row gap-4 mb-8 items-start md:items-center justify-between">
           <div className="flex flex-wrap gap-2">
+            {/* Nút lọc 'Tất cả' */}
             <Button
               variant={selectedCategory === 'all' ? 'default' : 'outline'}
               onClick={() => setSelectedCategory('all')}
@@ -99,6 +139,7 @@ function ShopContent() {
             >
               Tất cả
             </Button>
+            {/* Danh sách các danh mục sản phẩm từ database */}
             {categories.map((cat) => (
               <Button
                 key={cat.id}
@@ -111,11 +152,12 @@ function ShopContent() {
             ))}
           </div>
 
+          {/* Chọn tiêu chí sắp xếp */}
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sắp xếp" />
+                <SelectValue placeholder="Sắp xếp theo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Mới nhất</SelectItem>
@@ -126,6 +168,7 @@ function ShopContent() {
           </div>
         </div>
 
+        {/* Danh sách sản phẩm - Hiển thị Skeleton khi đang tải */}
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -139,40 +182,45 @@ function ShopContent() {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
+          /* Thông báo khi không tìm thấy sản phẩm phù hợp */
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Không có sản phẩm nào trong danh mục này.</p>
+            <p className="text-muted-foreground">Không tìm thấy sản phẩm nào phù hợp với yêu cầu.</p>
           </div>
         ) : (
+          /* Lưới hiển thị danh sách sản phẩm */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product, index) => (
-              <Card key={product.id} className="overflow-hidden group animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+              <Card key={product.id} className="overflow-hidden group animate-fade-in flex flex-col h-full" style={{ animationDelay: `${index * 50}ms` }}>
                 <Link href={`/shop/${product.slug}`}>
-                  <div className="relative aspect-square overflow-hidden bg-muted">
-                    <Image
-                      src={product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                    {/* Hình ảnh sản phẩm kèm nhãn giảm giá */}
+                    <div className="relative aspect-square overflow-hidden bg-muted">
+                        <Image
+                          src={cleanImageUrl(product.image_url || fallbackImages.product[index % fallbackImages.product.length])}
+                          alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     {product.original_price && product.original_price > product.price && (
-                      <span className="absolute top-2 left-2 bg-destructive text-white text-xs px-2 py-1 rounded">
-                        -{Math.round((1 - product.price / product.original_price) * 100)}%
+                      <span className="absolute top-2 left-2 bg-destructive text-white text-[10px] md:text-xs px-2 py-1 rounded font-bold shadow-sm">
+                        GIẢM {Math.round((1 - product.price / product.original_price) * 100)}%
                       </span>
                     )}
                   </div>
                 </Link>
-                <CardContent className="p-4">
+                <CardContent className="p-4 flex flex-col flex-1">
                   <Link href={`/shop/${product.slug}`}>
-                    <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                    <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors mb-2 min-h-[40px]">
                       {product.name}
                     </h3>
                   </Link>
+                  {/* Đánh giá 5 sao (giả định) */}
                   <div className="flex items-center gap-1 mb-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star key={star} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <div className="flex items-center justify-between">
+                  {/* Giá sản phẩm và nút thêm vào giỏ hàng */}
+                  <div className="flex items-center justify-between mt-auto pt-2">
                     <div>
                       <span className="text-lg font-bold text-primary">
                         {product.price.toLocaleString('vi-VN')}đ
@@ -186,8 +234,9 @@ function ShopContent() {
                     <Button
                       size="icon"
                       variant="outline"
-                      className="h-8 w-8"
+                      className="h-9 w-9 border-primary/20 hover:bg-primary hover:text-white transition-all"
                       onClick={() => handleAddToCart(product)}
+                      title="Thêm vào giỏ hàng"
                     >
                       <ShoppingCart className="w-4 h-4" />
                     </Button>
@@ -201,6 +250,7 @@ function ShopContent() {
     </div>
   )
 }
+
 
 // Trang cửa hàng với Suspense để tải nội dung chính
 export default function ShopPage() {

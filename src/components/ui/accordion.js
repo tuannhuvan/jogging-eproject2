@@ -3,11 +3,19 @@ import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronDownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// Tab accordion là một kỹ thuật thiết kế web, cho phép trình bày thông tin theo dạng 
+// các tab hoặc mục có thể mở rộng và thu gọn. Khi người dùng click vào một tab hoặc mục,
+//  nội dung chi tiết sẽ hiển thị, giúp tiết kiệm không gian và giữ giao diện gọn gàng
+// Component Accordion - container chính cho các mục accordion có thể thu gọn/mở rộng
+// Sử dụng Radix UI AccordionPrimitive.Root làm nền tảng
 function Accordion({
   ...props
 }) {
   return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
 }
+
+// AccordionItem - mỗi mục trong accordion, có border dưới để phân tách các mục
 function AccordionItem({
   className,
   ...props
@@ -20,6 +28,9 @@ function AccordionItem({
     />
   );
 }
+
+// AccordionTrigger - nút bấm để thu gọn/mở rộng nội dung accordion
+// Bao gồm icon mũi tên xoay 180 độ khi mở
 function AccordionTrigger({
   className,
   children,
@@ -36,11 +47,15 @@ function AccordionTrigger({
         {...props}
       >
         {children}
+        {/* Icon mũi tên - xoay khi accordion mở */}
         <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );
 }
+
+// AccordionContent - nội dung được hiển thị khi accordion mở
+// Có animation thu gọn/mở rộng mượt mà
 function AccordionContent({
   className,
   children,
@@ -56,4 +71,5 @@ function AccordionContent({
     </AccordionPrimitive.Content>
   );
 }
+
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };

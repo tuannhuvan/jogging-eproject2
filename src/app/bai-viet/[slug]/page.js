@@ -1,5 +1,16 @@
 "use client"
 
+/**
+ * BAI VIET DETAIL PAGE - Trang chi tiết bài viết
+ * 
+ * Trang này hiển thị:
+ * - Banner với hình ảnh bài viết và tiêu đề
+ * - Nội dung bài viết đầy đủ (HTML)
+ * - Phần bình luận: form gửi bình luận và danh sách bình luận
+ * 
+ * Route: /bai-viet/[slug]
+ */
+
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
@@ -12,33 +23,47 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/lib/auth-context'
 import { toast } from 'sonner'
 
-// Trang chi tiết bài viết kiến thức
+/**
+ * Component trang chi tiết bài viết
+ * Hiển thị nội dung bài viết và cho phép bình luận
+ */
 export default function PostDetailPage() {
+  // Lấy slug từ URL params
   const params = useParams()
+  // Lấy thông tin user và profile từ AuthContext
   const { user, profile } = useAuth()
+  // State lưu thông tin bài viết
   const [post, setPost] = useState(null)
+  // State lưu danh sách bình luận
   const [comments, setComments] = useState([])
+  // State lưu nội dung bình luận mới
   const [newComment, setNewComment] = useState('')
+  // State theo dõi trạng thái đang tải
   const [loading, setLoading] = useState(true)
+  // State theo dõi trạng thái đang gửi bình luận
   const [submitting, setSubmitting] = useState(false)
 
-  // Tải dữ liệu bài viết và bình luận khi component được gắn kết
+  // Effect: Tải thông tin bài viết và bình luận khi component mount
   useEffect(() => {
     async function fetchPost() {
+      // Truy vấn bài viết theo slug
       const { data } = await supabase
         .from('posts')
         .select('*')
         .eq('slug', params.slug)
         .single()
       
+      // Nếu tìm thấy bài viết, tải bình luận liên quan
       if (data) {
         setPost(data)
+        // Truy vấn bình luận của bài viết, sắp xếp theo thời gian mới nhất
         const { data: commentsData } = await supabase
           .from('comments')
           .select('*')
           .eq('post_id', data.id)
           .order('created_at', { ascending: false })
         
+        // Thiết lập danh sách bình luận
         if (commentsData) setComments(commentsData)
       }
       setLoading(false)
@@ -46,12 +71,17 @@ export default function PostDetailPage() {
     fetchPost()
   }, [params.slug])
 
-  // Hàm xử lý gửi bình luận mới
+  /**
+   * Hàm xử lý gửi bình luận mới
+   * @param {Event} e - Sự kiện submit form
+   */
   async function handleSubmitComment(e) {
     e.preventDefault()
+    // Kiểm tra điều kiện trước khi gửi
     if (!user || !profile || !post || !newComment.trim()) return
 
     setSubmitting(true)
+    // Thêm bình luận mới vào database
     const { data, error } = await supabase
       .from('comments')
       .insert({
@@ -63,9 +93,11 @@ export default function PostDetailPage() {
       .select()
       .single()
 
+    // Xử lý kết quả gửi bình luận
     if (error) {
       toast.error('Không thể gửi bình luận')
     } else if (data) {
+      // Thêm bình luận mới vào đầu danh sách
       setComments([data, ...comments])
       setNewComment('')
       toast.success('Bình luận đã được gửi')
@@ -73,7 +105,7 @@ export default function PostDetailPage() {
     setSubmitting(false)
   }
 
-  // Hiển thị trạng thái tải dữ liệu
+  // Hiển thị skeleton loading khi đang tải
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -91,20 +123,20 @@ export default function PostDetailPage() {
   }
 
   // Hiển thị thông báo nếu không tìm thấy bài viết
-    if (!post) {
+  if (!post) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">Không tìm thấy bài viết</h1>
-        <Link href="/kien-thuc">
-          <Button>Quay lại kiến thức chạy bộ</Button>
+        <Link href="/bai-viet">
+          <Button>Quay lại danh sách bài viết</Button>
         </Link>
       </div>
     )
   }
 
-  // Hiển thị nội dung bài viết và bình luận
   return (
     <div className="min-h-screen">
+      {/* Banner với hình ảnh bài viết */}
       <div className="relative h-[300px] md:h-[400px]">
         <Image
           src={post.image_url || 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=1600'}
@@ -112,16 +144,21 @@ export default function PostDetailPage() {
           fill
           className="object-cover"
         />
+        {/* Lớp phủ gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20" />
+        {/* Nội dung trên banner */}
         <div className="absolute inset-0 flex items-end">
           <div className="container mx-auto px-4 pb-8">
-            <Link href="/kien-thuc" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors">
+            {/* Link quay lại */}
+            <Link href="/bai-viet" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors">
               <ArrowLeft className="w-4 h-4" />
               Quay lại
             </Link>
+            {/* Tiêu đề bài viết */}
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 max-w-3xl">
               {post.title}
             </h1>
+            {/* Thông tin tác giả và ngày đăng */}
             <div className="flex items-center gap-4 text-white/80 text-sm">
               <span className="flex items-center gap-1">
                 <UserIcon className="w-4 h-4" />
@@ -142,16 +179,19 @@ export default function PostDetailPage() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
+          {/* Nội dung bài viết - render HTML */}
           <article className="prose prose-lg max-w-none mb-12">
             <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </article>
 
+          {/* Phần bình luận */}
           <div className="border-t pt-8">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
               Bình luận ({comments.length})
             </h3>
 
+            {/* Form gửi bình luận - chỉ hiển thị khi đã đăng nhập */}
             {user ? (
               <form onSubmit={handleSubmitComment} className="mb-8">
                 <Textarea
@@ -167,6 +207,7 @@ export default function PostDetailPage() {
                 </Button>
               </form>
             ) : (
+              // Thông báo yêu cầu đăng nhập
               <Card className="mb-8">
                 <CardContent className="p-4 text-center">
                   <p className="text-muted-foreground mb-4">Đăng nhập để bình luận</p>
@@ -177,6 +218,7 @@ export default function PostDetailPage() {
               </Card>
             )}
 
+            {/* Danh sách bình luận */}
             <div className="space-y-4">
               {comments.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
@@ -187,16 +229,20 @@ export default function PostDetailPage() {
                   <Card key={comment.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
+                        {/* Avatar người bình luận */}
                         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                           <UserIcon className="w-4 h-4 text-primary" />
                         </div>
                         <div>
+                          {/* Tên người bình luận */}
                           <p className="font-medium text-sm">{comment.user_name}</p>
+                          {/* Thời gian bình luận */}
                           <p className="text-xs text-muted-foreground">
                             {new Date(comment.created_at).toLocaleString('vi-VN')}
                           </p>
                         </div>
                       </div>
+                      {/* Nội dung bình luận */}
                       <p className="text-sm pl-10">{comment.content}</p>
                     </CardContent>
                   </Card>

@@ -1,14 +1,36 @@
+/**
+ * GLOBALS.CSS - File CSS toàn cục của ứng dụng
+ * 
+ * File này chứa:
+ * - Import font chữ Be Vietnam Pro (tiếng Việt)
+ * - Cấu hình Tailwind CSS và animate.css
+ * - Định nghĩa các biến màu sắc (CSS Variables) cho theme
+ * - Các animation tùy chỉnh (fade-in, slide-in, ticker)
+ */
+
+/* ==================== IMPORTS ==================== */
+/* Import font Be Vietnam Pro - font tiếng Việt đẹp với nhiều độ đậm */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+/* Import Tailwind CSS core */
 @import "tailwindcss";
+/* Import thư viện animation */
 @import "tw-animate-css";
-/* Tailwind CSS and animate.css imports */
+
+/* Cấu hình variant cho dark mode */
 @custom-variant dark (&:is(.dark *));
 
+/* ==================== CẤU HÌNH THEME TAILWIND ==================== */
+/* Định nghĩa các biến CSS để Tailwind có thể sử dụng */
 @theme inline {
+  /* Màu nền và chữ chính */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  
+  /* Font chữ */
   --font-sans: 'Be Vietnam Pro', sans-serif;
   --font-mono: var(--font-geist-mono);
+  
+  /* Màu sắc cho Sidebar component */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -17,11 +39,15 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  
+  /* Màu sắc cho biểu đồ (charts) */
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  
+  /* Màu sắc UI cơ bản */
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -38,37 +64,64 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  
+  /* Border radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* ==================== CSS VARIABLES - LIGHT MODE ==================== */
+/* Định nghĩa giá trị màu sắc cho chế độ sáng (mặc định) */
 :root {
+  /* Border radius cơ bản */
   --radius: 0.625rem;
-  --background: oklch(0.98 0.005 90);
-  --foreground: oklch(0.2 0.02 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 260);
+  
+  /* Màu nền và chữ chính */
+  --background: oklch(0.98 0.005 90);          /* Màu nền sáng kem nhẹ */
+  --foreground: oklch(0.2 0.02 260);           /* Màu chữ tối */
+  
+  /* Màu cho Card component */
+  --card: oklch(1 0 0);                        /* Màu nền card trắng */
+  --card-foreground: oklch(0.2 0.02 260);      /* Màu chữ trong card */
+  
+  /* Màu cho Popover/Dropdown */
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.02 260);
-  --primary: oklch(0.55 0.25 145);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.02 145);
+  
+  /* Màu chính (Primary) - Màu xanh lá */
+  --primary: oklch(0.55 0.25 145);             /* Xanh lá đậm */
+  --primary-foreground: oklch(1 0 0);          /* Chữ trắng trên nền primary */
+  
+  /* Màu phụ (Secondary) */
+  --secondary: oklch(0.95 0.02 145);           /* Xanh lá nhạt */
   --secondary-foreground: oklch(0.35 0.15 145);
+  
+  /* Màu muted (yếu, nhạt) cho text phụ */
   --muted: oklch(0.95 0.01 260);
   --muted-foreground: oklch(0.5 0.02 260);
-  --accent: oklch(0.65 0.2 35);
+  
+  /* Màu accent (điểm nhấn) - Màu cam */
+  --accent: oklch(0.65 0.2 35);                /* Cam đậm */
   --accent-foreground: oklch(1 0 0);
+  
+  /* Màu destructive (cảnh báo/xóa) - Màu đỏ */
   --destructive: oklch(0.55 0.25 25);
+  
+  /* Màu border và input */
   --border: oklch(0.9 0.01 260);
   --input: oklch(0.9 0.01 260);
-  --ring: oklch(0.55 0.25 145);
-  --chart-1: oklch(0.55 0.25 145);
-  --chart-2: oklch(0.65 0.2 35);
-  --chart-3: oklch(0.6 0.15 200);
-  --chart-4: oklch(0.7 0.18 80);
-  --chart-5: oklch(0.75 0.15 320);
+  --ring: oklch(0.55 0.25 145);                /* Focus ring màu xanh lá */
+  
+  /* Màu cho biểu đồ */
+  --chart-1: oklch(0.55 0.25 145);             /* Xanh lá */
+  --chart-2: oklch(0.65 0.2 35);               /* Cam */
+  --chart-3: oklch(0.6 0.15 200);              /* Xanh dương */
+  --chart-4: oklch(0.7 0.18 80);               /* Vàng */
+  --chart-5: oklch(0.75 0.15 320);             /* Hồng */
+  
+  /* Màu cho Sidebar */
   --sidebar: oklch(0.98 0.005 90);
   --sidebar-foreground: oklch(0.2 0.02 260);
   --sidebar-primary: oklch(0.55 0.25 145);
@@ -79,55 +132,94 @@
   --sidebar-ring: oklch(0.55 0.25 145);
 }
 
+/* ==================== BASE STYLES ==================== */
+/* Áp dụng style cơ bản cho tất cả elements */
 @layer base {
+  /* Tất cả elements có border và outline mặc định */
   * {
     @apply border-border outline-ring/50;
   }
+  /* Body sử dụng màu nền, chữ và font đã định nghĩa */
   body {
     @apply bg-background text-foreground font-sans;
   }
 }
 
+/* ==================== KEYFRAME ANIMATIONS ==================== */
+/* Animation hiệu ứng mờ dần vào (fade-in) */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
+/* Animation trượt vào từ bên trái */
 @keyframes slide-in-left {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { 
+    opacity: 0; 
+    transform: translateX(-20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
 }
 
+/* Animation trượt vào từ bên phải */
 @keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { 
+    opacity: 0; 
+    transform: translateX(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
 }
 
+/* Animation ticker chạy (dùng cho footer) */
 @keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% { 
+    transform: translateX(0); 
+  }
+  100% { 
+    transform: translateX(-50%); 
+  }
 }
 
+/* ==================== ANIMATION CLASSES ==================== */
+/* Class sử dụng animation fade-in */
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
 }
 
+/* Class sử dụng animation slide-in từ trái */
 .animate-slide-in-left {
   animation: slide-in-left 0.5s ease-out forwards;
 }
 
+/* Class sử dụng animation slide-in từ phải */
 .animate-slide-in-right {
   animation: slide-in-right 0.5s ease-out forwards;
 }
 
+/* Class sử dụng animation ticker - chạy liên tục 30 giây */
 .animate-ticker {
   animation: ticker 30s linear infinite;
 }
 
+/* Class cho hiệu ứng chuyển trang */
 .page-transition {
   animation: fade-in 0.3s ease-out;
 }
 
+/* ==================== FIXES ==================== */
+/* Ẩn portal Next.js (dùng cho dev tools) */
 nextjs-portal {
   display: none !important;
 }

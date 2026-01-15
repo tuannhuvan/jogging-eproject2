@@ -1,9 +1,11 @@
 "use client"
 import { useMemo } from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+
+// FieldSet - container cho nhóm các field trong form dùng để nhập liệu
 function FieldSet({ className, ...props }) {
   return (
     <fieldset
@@ -17,6 +19,10 @@ function FieldSet({ className, ...props }) {
     />
   )
 }
+
+// FieldLegend - tiêu đề cho FieldSet
+// Props:
+// - variant: legend (lớn) hoặc label (nhỏ)
 function FieldLegend({
   className,
   variant = "legend",
@@ -36,6 +42,8 @@ function FieldLegend({
     />
   )
 }
+
+// FieldGroup - nhóm các Field lại với nhau
 function FieldGroup({ className, ...props }) {
   return (
     <div
@@ -48,6 +56,11 @@ function FieldGroup({ className, ...props }) {
     />
   )
 }
+
+// Định nghĩa variants cho Field layout
+// - vertical: label trên, input dưới
+// - horizontal: label trái, input phải
+// - responsive: vertical trên mobile, horizontal trên desktop
 const fieldVariants = cva(
   "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
   {
@@ -71,11 +84,15 @@ const fieldVariants = cva(
     },
   }
 )
+
+// Field - container cho một field đơn (label + input + description + error)
+// Props:
+// - orientation: hướng bố trí (vertical/horizontal/responsive)
 function Field({
   className,
   orientation = "vertical",
   ...props
-} & VariantProps<typeof fieldVariants>) {
+}) {
   return (
     <div
       role="group"
@@ -86,6 +103,8 @@ function Field({
     />
   )
 }
+
+// FieldContent - wrapper cho nội dung field (input, description, error)
 function FieldContent({ className, ...props }) {
   return (
     <div
@@ -98,6 +117,8 @@ function FieldContent({ className, ...props }) {
     />
   )
 }
+
+// FieldLabel - label cho field, sử dụng Label component
 function FieldLabel({
   className,
   ...props
@@ -115,6 +136,8 @@ function FieldLabel({
     />
   )
 }
+
+// FieldTitle - tiêu đề field (alternative cho FieldLabel)
 function FieldTitle({ className, ...props }) {
   return (
     <div
@@ -127,6 +150,8 @@ function FieldTitle({ className, ...props }) {
     />
   )
 }
+
+// FieldDescription - mô tả/hướng dẫn cho field
 function FieldDescription({ className, ...props }) {
   return (
     <p
@@ -141,6 +166,9 @@ function FieldDescription({ className, ...props }) {
     />
   )
 }
+
+// FieldSeparator - đường phân cách giữa các field
+// Có thể có nội dung text ở giữa (như "hoặc")
 function FieldSeparator({
   children,
   className,
@@ -168,13 +196,18 @@ function FieldSeparator({
     </div>
   )
 }
+
+// FieldError - hiển thị thông báo lỗi validation
+// Props:
+// - errors: mảng các error objects từ form validation
+// - children: nội dung lỗi tùy chỉnh
 function FieldError({
   className,
   children,
   errors,
   ...props
-} | undefined>
 }) {
+  // Tính toán nội dung hiển thị từ children hoặc errors
   const content = useMemo(() => {
     if (children) {
       return children
@@ -182,12 +215,15 @@ function FieldError({
     if (!errors?.length) {
       return null
     }
+    // Loại bỏ các error trùng lặp
     const uniqueErrors = [
       ...new Map(errors.map((error) => [error?.message, error])).values(),
     ]
+    // Hiển thị đơn lẻ nếu chỉ có 1 error
     if (uniqueErrors?.length == 1) {
       return uniqueErrors[0]?.message
     }
+    // Hiển thị dạng list nếu có nhiều errors
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
         {uniqueErrors.map(
@@ -197,9 +233,11 @@ function FieldError({
       </ul>
     )
   }, [children, errors])
+  
   if (!content) {
     return null
   }
+  
   return (
     <div
       role="alert"
@@ -211,6 +249,7 @@ function FieldError({
     </div>
   )
 }
+
 export {
   Field,
   FieldLabel,

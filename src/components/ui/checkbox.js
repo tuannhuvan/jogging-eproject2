@@ -6,6 +6,10 @@ import { CheckIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Checkbox - ô đánh dấu chọn/bỏ chọn
+// Sử dụng Radix UI CheckboxPrimitive làm nền tảng
+// Có các trạng thái: checked, unchecked, indeterminate
+// Hỗ trợ focus visible, aria-invalid cho validation
 function Checkbox({
   className,
   ...props
@@ -19,6 +23,7 @@ function Checkbox({
       )}
       {...props}
     >
+      {/* Indicator hiển thị khi checked - icon dấu tick */}
       <CheckboxPrimitive.Indicator
         data-slot="checkbox-indicator"
         className="grid place-content-center text-current transition-none"

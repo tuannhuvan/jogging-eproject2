@@ -2,6 +2,9 @@ import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
 
+// Xác định nếu thiết bị hiện tại là di động dựa trên kích thước màn hình
+// Trả về true nếu là di động, false nếu không phải
+// Sử dụng hook này để điều chỉnh giao diện người dùng cho phù hợp với thiết bị di động
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState(undefined)
 

@@ -2,16 +2,34 @@
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 import { cn } from "@/lib/utils"
+
+// Popover - container chính cho popup nhỏ:  Một hộp thoại nhỏ hiện ra khi nhấn vào một phần tử, 
+// thường dùng để hiển thị thông tin bổ sung hoặc menu nhanh mà không làm mất ngữ cảnh trang
+// Sử dụng Radix UI PopoverPrimitive làm nền tảng
 function Popover({
   ...props
 }) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
+
+// PopoverTrigger - element kích hoạt mở popover
 function PopoverTrigger({
   ...props
 }) {
   return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
 }
+
+// PopoverAnchor - element neo vị trí popover (không kích hoạt mở)
+function PopoverAnchor({
+  ...props
+}) {
+  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
+}
+
+// PopoverContent - nội dung của popover
+// Props:
+// - align: căn chỉnh (start/center/end)
+// - sideOffset: khoảng cách từ anchor (mặc định: 4px)
 function PopoverContent({
   className,
   align = "center",
@@ -33,9 +51,5 @@ function PopoverContent({
     </PopoverPrimitive.Portal>
   )
 }
-function PopoverAnchor({
-  ...props
-}) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
-}
+
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }

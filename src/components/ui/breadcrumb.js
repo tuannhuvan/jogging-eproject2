@@ -2,9 +2,19 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+//Breadcrumb, hay còn gọi là “đường dẫn phân cấp”, là một dạng navigation UI thường được 
+// đặt ở phần đầu của trang web, ngay dưới thanh menu chính. 
+// Nó hiển thị đường đi từ trang chủ đến trang hiện tại, giúp người dùng biết họ đang ở đâu trong cấu trúc trang web 
+// và dễ dàng quay lại các trang trước đó.
+// Breadcrumb - container chính cho điều hướng breadcrumb
+// Có aria-label để hỗ trợ accessibility
 function Breadcrumb({ ...props }) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />
 }
+
+// BreadcrumbList (là danh sách các đường dẫn phân cấp) - danh sách các mục trong breadcrumb
+// Sử dụng flexbox với gap responsive
 function BreadcrumbList({ className, ...props }) {
   return (
     <ol
@@ -17,6 +27,8 @@ function BreadcrumbList({ className, ...props }) {
     />
   )
 }
+
+// BreadcrumbItem - mỗi mục trong breadcrumb
 function BreadcrumbItem({ className, ...props }) {
   return (
     <li
@@ -26,6 +38,10 @@ function BreadcrumbItem({ className, ...props }) {
     />
   )
 }
+
+// BreadcrumbLink - link có thể click trong breadcrumb
+// Props:
+// - asChild: nếu true, sử dụng element con làm gốc (ví dụ: Next.js Link)
 function BreadcrumbLink({
   asChild,
   className,
@@ -40,6 +56,9 @@ function BreadcrumbLink({
     />
   )
 }
+
+// BreadcrumbPage - mục hiện tại (không phải link)
+// Được đánh dấu aria-current="page" cho accessibility
 function BreadcrumbPage({ className, ...props }) {
   return (
     <span
@@ -52,6 +71,8 @@ function BreadcrumbPage({ className, ...props }) {
     />
   )
 }
+
+// BreadcrumbSeparator - ký tự phân cách giữa các mục (mặc định là icon ">")
 function BreadcrumbSeparator({
   children,
   className,
@@ -69,6 +90,9 @@ function BreadcrumbSeparator({
     </li>
   )
 }
+
+// BreadcrumbEllipsis - hiển thị dấu "..." khi có quá nhiều mục
+// Thường dùng khi cần rút gọn breadcrumb
 function BreadcrumbEllipsis({
   className,
   ...props
@@ -86,6 +110,7 @@ function BreadcrumbEllipsis({
     </span>
   )
 }
+
 export {
   Breadcrumb,
   BreadcrumbList,

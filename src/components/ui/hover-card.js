@@ -2,11 +2,17 @@
 import * as React from "react"
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card"
 import { cn } from "@/lib/utils"
+
+// HoverCard - card hiện khi hover chuột
+// Sử dụng Radix UI HoverCardPrimitive làm nền tảng
+// Thường dùng để hiển thị preview hoặc thông tin thêm
 function HoverCard({
   ...props
 }) {
   return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />
 }
+
+// HoverCardTrigger - element kích hoạt hover card
 function HoverCardTrigger({
   ...props
 }) {
@@ -14,6 +20,11 @@ function HoverCardTrigger({
     <HoverCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />
   )
 }
+
+// HoverCardContent - nội dung của hover card
+// Props:
+// - align: căn chỉnh (start/center/end)
+// - sideOffset: khoảng cách từ trigger (mặc định: 4px)
 function HoverCardContent({
   className,
   align = "center",
@@ -35,4 +46,5 @@ function HoverCardContent({
     </HoverCardPrimitive.Portal>
   )
 }
+
 export { HoverCard, HoverCardTrigger, HoverCardContent }

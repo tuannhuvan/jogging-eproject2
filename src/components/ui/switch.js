@@ -2,6 +2,10 @@
 import * as React from "react"
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { cn } from "@/lib/utils"
+
+// Switch - công tắc bật/tắt
+// Sử dụng Radix UI SwitchPrimitive làm nền tảng
+// Thường dùng cho các setting on/off như dark mode, notifications
 function Switch({
   className,
   ...props
@@ -15,6 +19,7 @@ function Switch({
       )}
       {...props}
     >
+      {/* Thumb - núm tròn trượt sang trái/phải */}
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
@@ -24,4 +29,5 @@ function Switch({
     </SwitchPrimitive.Root>
   )
 }
+
 export { Switch }

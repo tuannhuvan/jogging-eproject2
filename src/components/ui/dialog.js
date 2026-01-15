@@ -6,30 +6,39 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Dialog (Hộp thoại): Một cửa sổ nhỏ xuất hiện trên giao diện chính, dùng để giao tiếp trực tiếp với người dùng,
+// có thể là Modal (chặn tương tác) hoặc Non-modal (cho phép tương tác nền)
+// Dialog - hộp thoại modal
+// Sử dụng Radix UI DialogPrimitive làm nền tảng
 function Dialog({
   ...props
 }) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
+// DialogTrigger - nút kích hoạt mở dialog
 function DialogTrigger({
   ...props
 }) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
+// DialogPortal - render dialog vào portal (ngoài DOM tree)
 function DialogPortal({
   ...props
 }) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
+// DialogClose - nút đóng dialog
 function DialogClose({
   ...props
 }) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
+// DialogOverlay - lớp phủ mờ phía sau dialog
+// Có animation fade in/out
 function DialogOverlay({
   className,
   ...props
@@ -46,6 +55,10 @@ function DialogOverlay({
   )
 }
 
+// DialogContent - nội dung chính của dialog
+// Props:
+// - showCloseButton: hiển thị nút X đóng ở góc trên phải (mặc định: true)
+// Được căn giữa màn hình với animation zoom và fade
 function DialogContent({
   className,
   children,
@@ -78,6 +91,7 @@ function DialogContent({
   )
 }
 
+// DialogHeader - phần header chứa tiêu đề và mô tả
 function DialogHeader({ className, ...props }) {
   return (
     <div
@@ -88,6 +102,7 @@ function DialogHeader({ className, ...props }) {
   )
 }
 
+// DialogFooter - phần footer chứa các nút hành động
 function DialogFooter({ className, ...props }) {
   return (
     <div
@@ -101,6 +116,7 @@ function DialogFooter({ className, ...props }) {
   )
 }
 
+// DialogTitle - tiêu đề của dialog
 function DialogTitle({
   className,
   ...props
@@ -114,6 +130,7 @@ function DialogTitle({
   )
 }
 
+// DialogDescription - mô tả chi tiết của dialog
 function DialogDescription({
   className,
   ...props

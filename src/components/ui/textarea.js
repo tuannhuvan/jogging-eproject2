@@ -1,7 +1,9 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
+// Textarea - ô nhập văn bản nhiều dòng
+// Có auto-resize theo nội dung (field-sizing-content)
+// Hỗ trợ focus state, validation error (aria-invalid)
 function Textarea({ className, ...props }) {
   return (
     <textarea

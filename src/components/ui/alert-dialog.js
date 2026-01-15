@@ -3,11 +3,18 @@ import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+
+// AlertDialog là một thành phần giao diện quan trọng trong lập trình Android, 
+// giúp bạn hiển thị các thông báo, xác nhận hoặc nhận thông tin từ người dùng
+// AlertDialog - hộp thoại cảnh báo yêu cầu người dùng xác nhận hành động
+// Sử dụng Radix UI AlertDialogPrimitive làm nền tảng
 function AlertDialog({
   ...props
 }) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
 }
+
+// AlertDialogTrigger - nút kích hoạt hiển thị hộp thoại
 function AlertDialogTrigger({
   ...props
 }) {
@@ -15,6 +22,8 @@ function AlertDialogTrigger({
     <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
   )
 }
+
+// AlertDialogPortal - render hộp thoại vào portal (ngoài DOM tree hiện tại)
 function AlertDialogPortal({
   ...props
 }) {
@@ -22,6 +31,9 @@ function AlertDialogPortal({
     <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
   )
 }
+
+// AlertDialogOverlay - lớp phủ mờ đen phía sau hộp thoại
+// Có animation fade in/out khi mở/đóng
 function AlertDialogOverlay({
   className,
   ...props
@@ -37,11 +49,15 @@ function AlertDialogOverlay({
     />
   )
 }
+
+// AlertDialogContent - nội dung chính của hộp thoại
+// Được căn giữa màn hình với animation zoom và fade
 function AlertDialogContent({
   className,
   ...props
 }) {
   return (
+    <AlertDialogPortal>
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
@@ -54,6 +70,8 @@ function AlertDialogContent({
     </AlertDialogPortal>
   )
 }
+
+// AlertDialogHeader - phần header chứa tiêu đề và mô tả
 function AlertDialogHeader({
   className,
   ...props
@@ -66,6 +84,8 @@ function AlertDialogHeader({
     />
   )
 }
+
+// AlertDialogFooter - phần footer chứa các nút hành động
 function AlertDialogFooter({
   className,
   ...props
@@ -81,6 +101,8 @@ function AlertDialogFooter({
     />
   )
 }
+
+// AlertDialogTitle - tiêu đề của hộp thoại
 function AlertDialogTitle({
   className,
   ...props
@@ -93,6 +115,8 @@ function AlertDialogTitle({
     />
   )
 }
+
+// AlertDialogDescription - mô tả chi tiết nội dung hộp thoại
 function AlertDialogDescription({
   className,
   ...props
@@ -105,6 +129,8 @@ function AlertDialogDescription({
     />
   )
 }
+
+// AlertDialogAction - nút xác nhận hành động (thường là nút chính)
 function AlertDialogAction({
   className,
   ...props
@@ -116,6 +142,8 @@ function AlertDialogAction({
     />
   )
 }
+
+// AlertDialogCancel - nút hủy bỏ hành động (thường là nút phụ với variant outline)
 function AlertDialogCancel({
   className,
   ...props
@@ -127,6 +155,7 @@ function AlertDialogCancel({
     />
   )
 }
+
 export {
   AlertDialog,
   AlertDialogPortal,

@@ -5,6 +5,11 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils"
 
+// Separator - đường phân cách giữa các phần nội dung: Đường kẻ ngang hoặc dọc dùng để ngăn cách các nội dung khác nhau.
+// Sử dụng Radix UI SeparatorPrimitive làm nền tảng
+// Props:
+// - orientation: hướng (horizontal/vertical)
+// - decorative: nếu true, ẩn khỏi accessibility tree
 function Separator({
   className,
   orientation = "horizontal",
