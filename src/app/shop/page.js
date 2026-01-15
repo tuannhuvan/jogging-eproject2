@@ -191,16 +191,33 @@ function ShopContent() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product, index) => (
               <Card key={product.id} className="overflow-hidden group animate-fade-in flex flex-col h-full" style={{ animationDelay: `${index * 50}ms` }}>
-                <Link href={`/shop/${product.slug}`}>
-                    {/* Hình ảnh sản phẩm kèm nhãn giảm giá */}
-                    <div className="relative aspect-square overflow-hidden bg-muted">
-                        <Image
-                          src={cleanImageUrl(product.image_url || fallbackImages.product[index % fallbackImages.product.length])}
-                          alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    {product.original_price && product.original_price > product.price && (
+                  <Link href={`/shop/${product.slug}`}>
+                      {/* Hình ảnh sản phẩm kèm nhãn giảm giá */}
+                      <div className="relative aspect-square overflow-hidden bg-muted">
+                          {/* Ảnh chính */}
+                          <Image
+                            src={cleanImageUrl(product.image_url || fallbackImages.product[index % fallbackImages.product.length])}
+                            alt={product.name}
+                          fill
+                          className={`object-cover transition-all duration-500 ${
+                            product.images && product.images.length > 0 
+                              ? 'group-hover:opacity-0 group-hover:scale-105' 
+                              : 'group-hover:scale-105'
+                          }`}
+                        />
+                        
+                        {/* Ảnh thứ 2 hiển thị khi hover (nếu có) */}
+                        {product.images && product.images.length > 0 && (
+                          <Image
+                            src={cleanImageUrl(product.images[0])}
+                            alt={`${product.name} hover`}
+                            fill
+                            className="object-cover opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 absolute inset-0"
+                          />
+                        )}
+
+                      {product.original_price && product.original_price > product.price && (
+
                       <span className="absolute top-2 left-2 bg-destructive text-white text-[10px] md:text-xs px-2 py-1 rounded font-bold shadow-sm">
                         GIẢM {Math.round((1 - product.price / product.original_price) * 100)}%
                       </span>
