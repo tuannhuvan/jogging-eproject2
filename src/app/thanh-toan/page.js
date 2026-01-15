@@ -1,239 +1,417 @@
+/**
+ * Trang Thanh toán - Checkout Page
+ * 
+ * Chức năng:
+ * - Hiển thị form nhập thông tin giao hàng
+ * - Auto-fill thông tin từ profile nếu đã đăng nhập
+ * - Chọn phương thức thanh toán: COD hoặc MoMo
+ * - Tạo đơn hàng và xử lý thanh toán
+ * 
+ * Phương thức thanh toán:
+ * 1. COD (Cash On Delivery): Thanh toán khi nhận hàng
+ *    - API: /api/checkout/cod
+ *    - Redirect: /don-hang/{orderId}?success=true
+ * 
+ * 2. MoMo: Thanh toán qua ví điện tử
+ *    - API: /api/checkout/momo
+ *    - Redirect: MoMo payment page -> callback -> /don-hang/{orderId}
+ * 
+ * Yêu cầu:
+ * - Người dùng phải đăng nhập
+ * - Giỏ hàng không được trống
+ * - Phải nhập địa chỉ và số điện thoại
+ * 
+ * Luồng COD:
+ * 1. User nhập thông tin và chọn COD
+ * 2. Gọi API /api/checkout/cod
+ * 3. API tạo order, trừ tồn kho
+ * 4. Redirect về /don-hang/{orderId}?success=true
+ * 5. Admin quản lý đơn hàng, cập nhật trạng thái khi giao hàng thành công
+ */
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CheckCircle } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, CreditCard, MapPin, Phone, Loader2, Lock, Banknote, Wallet, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCart } from '@/lib/cart-context'
 import { useAuth } from '@/lib/auth-context'
-import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
-// Trang Thanh toán đơn hàng (Checkout)
 export default function CheckoutPage() {
+  // === HOOKS ===
   const router = useRouter()
-  // Lấy thông tin từ giỏ hàng (sản phẩm, tổng tiền, hàm xóa giỏ hàng)
   const { items, totalAmount, clearCart } = useCart()
-  // Lấy thông tin người dùng từ AuthContext
-  const { user, profile } = useAuth()
-  // Quản lý trạng thái đang xử lý và trạng thái thành công
+  const { user, profile, loading: authLoading } = useAuth()
+  
+  // === STATE ===
+  // Trạng thái loading khi xử lý thanh toán
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  // Dữ liệu biểu mẫu thông tin giao hàng
+  // Phương thức thanh toán: 'cod' hoặc 'momo'
+  const [paymentMethod, setPaymentMethod] = useState('cod')
+  // Dữ liệu form
   const [formData, setFormData] = useState({
-    fullName: profile?.full_name || '',
+    fullName: '',
+    shippingAddress: '',
     phone: '',
-    address: '',
-    note: ''
   })
 
-  // Nếu chưa đăng nhập, chuyển hướng người dùng về trang đăng nhập
-  if (!user) {
-    router.push('/dang-nhap')
-    return null
-  }
-
-  // Nếu giỏ hàng trống (và không phải vừa đặt hàng xong), chuyển hướng về trang giỏ hàng
-  if (items.length === 0 && !success) {
-    router.push('/cart')
-    return null
-  }
-
-  // Xử lý khi người dùng nhấn nút "Xác nhận đặt hàng"
-  async function handleSubmit(e) {
-    e.preventDefault()
-    setLoading(true)
-
-    // Bước 1: Tạo bản ghi đơn hàng chính trong bảng 'orders'
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        user_id: user.id,
-        total_amount: totalAmount,
-        shipping_address: formData.address,
-        phone: formData.phone,
-        status: 'pending' // Trạng thái ban đầu là chờ xác nhận
-      })
-      .select()
-      .single()
-
-    // Kiểm tra lỗi khi tạo đơn hàng
-    if (orderError || !orderData) {
-      toast.error('Không thể tạo đơn hàng')
-      setLoading(false)
-      return
+  // === EFFECTS ===
+  /**
+   * Auto-fill thông tin từ profile khi đã đăng nhập
+   * Cập nhật form khi profile thay đổi
+   */
+  useEffect(() => {
+    if (profile) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: profile.full_name || prev.fullName,
+        shippingAddress: profile.address || prev.shippingAddress,
+        phone: profile.phone || prev.phone,
+      }))
     }
+  }, [profile])
 
-    // Bước 2: Chuẩn bị dữ liệu chi tiết các sản phẩm trong đơn hàng
-    const orderItems = items.map(item => ({
-      order_id: orderData.id,
-      product_id: item.id,
-      quantity: item.quantity,
-      price: item.price
-    }))
-
-    // Bước 3: Lưu chi tiết sản phẩm vào bảng 'order_items'
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems)
-
-    // Kiểm tra lỗi khi lưu chi tiết sản phẩm
-    if (itemsError) {
-      toast.error('Không thể thêm sản phẩm vào đơn hàng')
-      setLoading(false)
-      return
-    }
-
-    // Bước 4: Xóa giỏ hàng, hiển thị thông báo thành công và cập nhật UI
-    clearCart()
-    setSuccess(true)
-    toast.success('Đặt hàng thành công!')
-    setLoading(false)
-  }
-
-  // Giao diện hiển thị sau khi đặt hàng thành công
-  if (success) {
+  // === RENDER: Loading state ===
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4">
-        <div className="text-center animate-fade-in">
-          <CheckCircle className="w-20 h-20 text-primary mx-auto mb-6" />
-          <h1 className="text-3xl font-bold mb-4">Đặt hàng thành công!</h1>
-          <p className="text-muted-foreground mb-8 max-w-md">
-            Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn sớm để xác nhận đơn hàng.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/don-hang">
-              <Button>Xem đơn hàng</Button>
-            </Link>
-            <Link href="/shop">
-              <Button variant="outline">Tiếp tục mua sắm</Button>
-            </Link>
-          </div>
+      <div className="min-h-screen flex flex-col items-center justify-center py-16">
+        <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Đang tải...</p>
+      </div>
+    )
+  }
+
+  // === RENDER: Chưa đăng nhập ===
+  // Yêu cầu đăng nhập để thanh toán, sau đó quay lại trang này
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center py-16">
+        <Lock className="w-16 h-16 text-muted-foreground mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Vui lòng đăng nhập</h1>
+        <p className="text-muted-foreground mb-6 text-center max-w-md">
+          Bạn cần đăng nhập để thanh toán. Sau khi đăng nhập, bạn sẽ được quay lại trang thanh toán.
+        </p>
+        <div className="flex gap-4">
+          <Link href="/dang-nhap?redirect=/thanh-toan">
+            <Button>Đăng nhập</Button>
+          </Link>
+          <Link href="/dang-nhap?tab=register&redirect=/thanh-toan">
+            <Button variant="outline">Đăng ký tài khoản</Button>
+          </Link>
         </div>
       </div>
     )
   }
 
-  // Giao diện biểu mẫu thanh toán
+  // === RENDER: Giỏ hàng trống ===
+  if (items.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center py-16">
+        <ShoppingBag className="w-16 h-16 text-muted-foreground mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Giỏ hàng trống</h1>
+        <p className="text-muted-foreground mb-6">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+        <Link href="/shop">
+          <Button>Tiếp tục mua sắm</Button>
+        </Link>
+      </div>
+    )
+  }
+
+  // === HANDLERS ===
+  /**
+   * Xử lý thanh toán khi submit form
+   * - COD: Tạo đơn hàng, redirect về trang đơn hàng
+   * - MoMo: Tạo phiên thanh toán, redirect sang MoMo
+   */
+  async function handleCheckout(e) {
+    e.preventDefault()
+
+    // Validate form
+    if (!formData.fullName) {
+      toast.error('Vui lòng nhập họ tên người nhận')
+      return
+    }
+    if (!formData.shippingAddress) {
+      toast.error('Vui lòng nhập địa chỉ giao hàng')
+      return
+    }
+    if (!formData.phone) {
+      toast.error('Vui lòng nhập số điện thoại')
+      return
+    }
+
+    setLoading(true)
+    try {
+      // Chuẩn bị dữ liệu sản phẩm
+      const checkoutItems = items.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+      }))
+
+      // Chọn API endpoint dựa trên phương thức thanh toán
+      const apiUrl = paymentMethod === 'cod' ? '/api/checkout/cod' : '/api/checkout/momo'
+
+      // Gọi API checkout
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: checkoutItems,
+          userId: user.id,
+          fullName: formData.fullName,
+          shippingAddress: formData.shippingAddress,
+          phone: formData.phone,
+        }),
+      })
+
+      // Parse response
+      const data = await response.json()
+
+      // Kiểm tra lỗi từ API
+      if (!response.ok) {
+        throw new Error(data.error || 'Không thể xử lý đơn hàng')
+      }
+
+      // Xử lý COD - đặt hàng thành công
+      if (paymentMethod === 'cod') {
+        clearCart()
+        toast.success('Đặt hàng thành công! Đơn hàng của bạn đã được gửi đến admin.')
+        router.push(`/don-hang/${data.orderId}?success=true`)
+      } 
+      // Xử lý MoMo - redirect sang trang thanh toán
+      else {
+        clearCart()
+        if (data.payUrl) {
+          window.location.href = data.payUrl
+        } else {
+          throw new Error('Không nhận được URL thanh toán MoMo')
+        }
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      toast.error(error.message || 'Đã xảy ra lỗi khi thanh toán')
+      setLoading(false)
+    }
+  }
+
+  // === RENDER: Trang thanh toán ===
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen bg-secondary/5 py-8">
       <div className="container mx-auto px-4">
+        {/* Breadcrumb */}
+        <Link href="/cart" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Quay lại giỏ hàng
+        </Link>
+
         <h1 className="text-3xl font-bold mb-8">Thanh toán</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cột trái: Form nhập thông tin giao hàng */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông tin giao hàng</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName">Họ và tên</Label>
-                      <Input
-                        id="fullName"
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Số điện thoại</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
+        <form onSubmit={handleCheckout}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Cột bên trái - Form nhập thông tin */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Card thông tin giao hàng */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-primary" />
+                    Thông tin giao hàng
+                  </CardTitle>
+                  {profile && (
+                    <CardDescription>
+                      Thông tin được tự động điền từ tài khoản của bạn
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Input họ tên */}
                   <div className="space-y-2">
-                    <Label htmlFor="address">Địa chỉ giao hàng</Label>
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Họ tên người nhận
+                    </label>
+                    <Input
+                      placeholder="Nhập họ tên người nhận hàng"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  {/* Input địa chỉ */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Địa chỉ giao hàng</label>
                     <Textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder="Nhập địa chỉ giao hàng chi tiết (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)"
+                      value={formData.shippingAddress}
+                      onChange={(e) => setFormData({ ...formData, shippingAddress: e.target.value })}
                       required
                       rows={3}
                     />
                   </div>
+                  {/* Input số điện thoại */}
                   <div className="space-y-2">
-                    <Label htmlFor="note">Ghi chú (tùy chọn)</Label>
-                    <Textarea
-                      id="note"
-                      value={formData.note}
-                      onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                      rows={2}
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Số điện thoại
+                    </label>
+                    <Input
+                      type="tel"
+                      placeholder="Nhập số điện thoại liên hệ"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      required
                     />
                   </div>
-                  <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                    {loading ? 'Đang xử lý...' : 'Xác nhận đặt hàng'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
 
-          {/* Cột phải: Tóm tắt đơn hàng */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle>Đơn hàng của bạn</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Danh sách các sản phẩm đang đặt */}
-                <div className="space-y-4 mb-6">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex gap-3">
-                      <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                        <Image
-                          src={item.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100'}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium line-clamp-2">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">x{item.quantity}</p>
-                      </div>
-                      <p className="text-sm font-medium">
-                        {(item.price * item.quantity).toLocaleString('vi-VN')}đ
-                      </p>
+              {/* Card chọn phương thức thanh toán */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-primary" />
+                    Phương thức thanh toán
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Option COD */}
+                  <label 
+                    className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'hover:border-muted-foreground'}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-primary"
+                    />
+                    <Banknote className="w-6 h-6 text-green-600" />
+                    <div>
+                      <p className="font-medium">Thanh toán khi nhận hàng (COD)</p>
+                      <p className="text-sm text-muted-foreground">Thanh toán bằng tiền mặt khi nhận hàng</p>
                     </div>
-                  ))}
-                </div>
+                  </label>
+                  {/* Option MoMo */}
+                  <label 
+                    className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'momo' ? 'border-primary bg-primary/5' : 'hover:border-muted-foreground'}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="momo"
+                      checked={paymentMethod === 'momo'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-primary"
+                    />
+                    <Wallet className="w-6 h-6 text-pink-500" />
+                    <div>
+                      <p className="font-medium">Thanh toán qua MoMo</p>
+                      <p className="text-sm text-muted-foreground">Ví điện tử MoMo, QR Code, ATM</p>
+                    </div>
+                  </label>
+                </CardContent>
+              </Card>
 
-                {/* Tính toán tổng tiền */}
-                <div className="space-y-3 border-t pt-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tạm tính</span>
-                    <span>{totalAmount.toLocaleString('vi-VN')}đ</span>
+              {/* Card danh sách sản phẩm */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingBag className="w-5 h-5 text-primary" />
+                    Sản phẩm ({items.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                          <Image
+                            src={item.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200'}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">{item.name}</h4>
+                          <p className="text-sm text-muted-foreground">Số lượng: {item.quantity}</p>
+                          <p className="font-bold text-primary">
+                            {(item.price * item.quantity).toLocaleString('vi-VN')}đ
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Phí vận chuyển</span>
-                    <span className="text-primary">Miễn phí</span>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Cột bên phải - Tóm tắt đơn hàng */}
+            <div className="lg:col-span-1">
+              <Card className="sticky top-24">
+                <CardHeader>
+                  <CardTitle>Tóm tắt đơn hàng</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tạm tính</span>
+                      <span>{totalAmount.toLocaleString('vi-VN')}đ</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Phí vận chuyển</span>
+                      <span className="text-primary">Miễn phí</span>
+                    </div>
+                    <div className="border-t pt-3 flex justify-between">
+                      <span className="font-bold">Tổng cộng</span>
+                      <span className="text-xl font-bold text-primary">
+                        {totalAmount.toLocaleString('vi-VN')}đ
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between border-t pt-3">
-                    <span className="font-bold">Tổng cộng</span>
-                    <span className="text-xl font-bold text-primary">
-                      {totalAmount.toLocaleString('vi-VN')}đ
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
+                  {/* Nút thanh toán */}
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-lg gap-2"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Đang xử lý...
+                      </>
+                    ) : paymentMethod === 'cod' ? (
+                      <>
+                        <Banknote className="w-5 h-5" />
+                        Đặt hàng (COD)
+                      </>
+                    ) : (
+                      <>
+                        <Wallet className="w-5 h-5" />
+                        Thanh toán với MoMo
+                      </>
+                    )}
+                  </Button>
+
+                  {/* Mô tả phương thức thanh toán */}
+                  <p className="text-xs text-center text-muted-foreground">
+                    {paymentMethod === 'cod' 
+                      ? 'Bạn sẽ thanh toán khi nhận hàng. Đơn hàng sẽ được admin xác nhận.' 
+                      : 'Thanh toán an toàn qua ví MoMo'}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   )

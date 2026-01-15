@@ -22,6 +22,8 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+    minimumCacheTTL: 60,
+    unoptimized: true,
   },
   outputFileTracingRoot: path.resolve(__dirname, '../../'),
   eslint: {
