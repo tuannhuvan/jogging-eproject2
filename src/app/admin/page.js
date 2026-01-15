@@ -98,7 +98,7 @@ export default function AdminDashboard() {
     { href: '/admin/products', label: 'Quản lý sản phẩm', icon: Package },
     { href: '/admin/posts', label: 'Quản lý bài viết', icon: FileText },
     { href: '/admin/orders', label: 'Quản lý đơn hàng', icon: ShoppingCart },
-    { href: '/admin/users', label: 'Quản lý người dùng', icon: Users }
+    { href: '/admin/athletes', label: 'Quản lý người dùng', icon: Users }
   ]
 
   return (

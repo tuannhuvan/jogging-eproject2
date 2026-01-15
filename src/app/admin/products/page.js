@@ -223,6 +223,42 @@ export default function AdminProductsPage() {
     }
   }
 
+  /**
+   * Hàm lấy URL hình ảnh hợp lệ và làm sạch tiền tố 'o-' nếu có
+   * @param {string} url - URL hình ảnh
+   * @returns {string} URL hợp lệ hoặc placeholder
+   */
+  function getImageUrl(url) {
+    if (!url || typeof url !== 'string') return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100'
+    
+    let cleanUrl = url;
+    
+    // Nếu URL bắt đầu bằng 'o-', thử tìm phần URL thực sự bên trong
+    if (url.startsWith('o-')) {
+      const httpIndex = url.indexOf('http');
+      const dataIndex = url.indexOf('data:');
+      
+      let startIndex = -1;
+      if (httpIndex !== -1 && dataIndex !== -1) {
+        startIndex = Math.min(httpIndex, dataIndex);
+      } else {
+        startIndex = Math.max(httpIndex, dataIndex);
+      }
+      
+      if (startIndex !== -1) {
+        cleanUrl = url.substring(startIndex);
+      }
+    }
+
+    // Kiểm tra xem URL có hợp lệ không (phải bắt đầu bằng http, /, hoặc data:)
+    if (cleanUrl.startsWith('http') || cleanUrl.startsWith('/') || cleanUrl.startsWith('data:')) {
+      return cleanUrl
+    }
+    
+    // Nếu vẫn không hợp lệ, trả về placeholder
+    return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100'
+  }
+
   // Hiển thị skeleton loading khi đang tải
   if (authLoading || loading) {
     return (
@@ -390,14 +426,14 @@ export default function AdminProductsPage() {
                       {/* Cột sản phẩm: Hình ảnh và tên */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="relative w-12 h-12 rounded overflow-hidden bg-muted">
-                            <Image
-                              src={product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100'}
-                              alt={product.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
+                            <div className="relative w-12 h-12 rounded overflow-hidden bg-muted">
+                              <Image
+                                src={getImageUrl(product.image_url)}
+                                alt={product.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
                           <span className="font-medium">{product.name}</span>
                         </div>
                       </td>

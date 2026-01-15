@@ -114,6 +114,29 @@ export default function HomePage() {
     fetchData()
   }, [])
 
+  // Hàm làm sạch URL hình ảnh để tránh lỗi từ visual editor loader
+  function cleanImageUrl(url) {
+    if (!url) return '';
+    if (typeof url !== 'string') return url;
+    
+    if (url.startsWith('o-')) {
+      const httpIndex = url.indexOf('http');
+      const dataIndex = url.indexOf('data:');
+      
+      let startIndex = -1;
+      if (httpIndex !== -1 && dataIndex !== -1) {
+        startIndex = Math.min(httpIndex, dataIndex);
+      } else {
+        startIndex = Math.max(httpIndex, dataIndex);
+      }
+      
+      if (startIndex !== -1) {
+        return url.substring(startIndex);
+      }
+    }
+    return url;
+  }
+
   // Hàm chuyển đến slide tiếp theo
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % bannerSlides.length)
   // Hàm chuyển đến slide trước đó
@@ -308,15 +331,15 @@ export default function HomePage() {
               {events.map((event) => (
                 <Link key={event.id} href={`/events/${event.id}`} className="group">
                   <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
-                    {/* Hình ảnh sự kiện */}
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={event.image_url || 'https://images.unsplash.com/photo-1533560904424-a0c61dc306fc?w=800'}
-                        alt={event.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      {/* Badge trạng thái */}
+                      {/* Hình ảnh sự kiện */}
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={cleanImageUrl(event.image_url || 'https://images.unsplash.com/photo-1533560904424-a0c61dc306fc?w=800')}
+                          alt={event.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        {/* Badge trạng thái */}
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm 
                       px-3 py-1 rounded-full text-xs font-bold text-primary">
                         Sắp diễn ra
@@ -374,7 +397,7 @@ export default function HomePage() {
                     {/* Hình ảnh bài viết */}
                     <div className="relative h-48 overflow-hidden">
                       <Image
-                        src={post.image_url || fallbackImages.post[index % fallbackImages.post.length]}
+                        src={cleanImageUrl(post.image_url || fallbackImages.post[index % fallbackImages.post.length])}
                         alt={post.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -417,17 +440,17 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {products.map((product, index) => (
               <Link key={product.id} href={`/shop/${product.slug}`} className="group">
-                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 
-                animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                    {/* Hình ảnh sản phẩm */}
-                    <div className="relative aspect-square overflow-hidden bg-muted">
-                      <Image
-                        src={product.image_url || fallbackImages.product[index % fallbackImages.product.length]}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    {/* Badge giảm giá nếu có */}
+                  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 
+                  animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                      {/* Hình ảnh sản phẩm */}
+                      <div className="relative aspect-square overflow-hidden bg-muted">
+                        <Image
+                          src={cleanImageUrl(product.image_url || fallbackImages.product[index % fallbackImages.product.length])}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      {/* Badge giảm giá nếu có */}
                     {product.original_price && product.original_price > product.price && (
                       <span className="absolute top-2 left-2 bg-destructive text-white 
                       text-xs px-2 py-1 rounded">
