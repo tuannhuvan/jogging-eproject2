@@ -1,6 +1,17 @@
 "use client"
 
-import { useState } from 'react'
+/**
+ * AUTH PAGE - Trang đăng nhập/đăng ký
+ * 
+ * Trang này hiển thị:
+ * - Form đăng nhập với email và mật khẩu
+ * - Form đăng ký tài khoản mới
+ * - Tabs chuyển đổi giữa đăng nhập và đăng ký
+ * 
+ * Route: /dang-nhap
+ */
+
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
@@ -10,15 +21,25 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/lib/auth-context'
+import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
+/**
+ * Component trang xác thực người dùng
+ * Xử lý đăng nhập và đăng ký tài khoản
+ */
 export default function AuthPage() {
   const router = useRouter()
+  // Lấy các hàm đăng nhập/đăng ký từ AuthContext
   const { signIn, signUp } = useAuth()
+  // State theo dõi trạng thái đang xử lý
   const [loading, setLoading] = useState(false)
+  // State toggle hiển thị mật khẩu
   const [showPassword, setShowPassword] = useState(false)
 
+  // State dữ liệu form đăng nhập
   const [loginData, setLoginData] = useState({ email: '', password: '' })
+  // State dữ liệu form đăng ký
   const [registerData, setRegisterData] = useState({
     email: '',
     password: '',
@@ -26,6 +47,10 @@ export default function AuthPage() {
     fullName: ''
   })
 
+  /**
+   * Hàm xử lý đăng nhập
+   * @param {Event} e - Sự kiện submit form
+   */
   async function handleLogin(e) {
     e.preventDefault()
     setLoading(true)
@@ -34,21 +59,45 @@ export default function AuthPage() {
 
     if (error) {
       toast.error('Email hoặc mật khẩu không đúng')
-    } else {
+      setLoading(false)
+      return
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
       toast.success('Đăng nhập thành công')
+      
+      if (profile?.role === 'admin') {
+        router.push('/admin')
+      } else {
+        router.push('/')
+      }
+    } else {
       router.push('/')
     }
     setLoading(false)
   }
 
+  /**
+   * Hàm xử lý đăng ký
+   * @param {Event} e - Sự kiện submit form
+   */
   async function handleRegister(e) {
     e.preventDefault()
     
+    // Kiểm tra mật khẩu khớp
     if (registerData.password !== registerData.confirmPassword) {
       toast.error('Mật khẩu không khớp')
       return
     }
 
+    // Kiểm tra độ dài mật khẩu
     if (registerData.password.length < 6) {
       toast.error('Mật khẩu phải có ít nhất 6 ký tự')
       return
@@ -56,6 +105,7 @@ export default function AuthPage() {
 
     setLoading(true)
 
+    // Gọi hàm đăng ký từ AuthContext
     const { error } = await signUp(registerData.email, registerData.password, registerData.fullName)
 
     if (error) {
@@ -70,6 +120,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          {/* Logo và tên ứng dụng */}
           <Link href="/" className="inline-flex items-center justify-center gap-2 mb-4">
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-lg">J</span>
@@ -81,14 +132,17 @@ export default function AuthPage() {
           <CardTitle>Chào mừng bạn đến với JOG</CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Tabs chuyển đổi đăng nhập/đăng ký */}
           <Tabs defaultValue="login">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Đăng nhập</TabsTrigger>
               <TabsTrigger value="register">Đăng ký</TabsTrigger>
             </TabsList>
 
+            {/* Tab đăng nhập */}
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
+                {/* Trường Email */}
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
                   <Input
@@ -100,6 +154,7 @@ export default function AuthPage() {
                     required
                   />
                 </div>
+                {/* Trường Mật khẩu với toggle hiển thị */}
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Mật khẩu</Label>
                   <div className="relative">
@@ -111,6 +166,7 @@ export default function AuthPage() {
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required
                     />
+                    {/* Nút toggle hiển thị mật khẩu */}
                     <button
                       type="button"
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -126,8 +182,10 @@ export default function AuthPage() {
               </form>
             </TabsContent>
 
+            {/* Tab đăng ký */}
             <TabsContent value="register">
               <form onSubmit={handleRegister} className="space-y-4">
+                {/* Trường Họ và tên */}
                 <div className="space-y-2">
                   <Label htmlFor="register-name">Họ và tên</Label>
                   <Input
@@ -139,6 +197,7 @@ export default function AuthPage() {
                     required
                   />
                 </div>
+                {/* Trường Email */}
                 <div className="space-y-2">
                   <Label htmlFor="register-email">Email</Label>
                   <Input
@@ -150,6 +209,7 @@ export default function AuthPage() {
                     required
                   />
                 </div>
+                {/* Trường Mật khẩu */}
                 <div className="space-y-2">
                   <Label htmlFor="register-password">Mật khẩu</Label>
                   <div className="relative">
@@ -170,6 +230,7 @@ export default function AuthPage() {
                     </button>
                   </div>
                 </div>
+                {/* Trường Xác nhận mật khẩu */}
                 <div className="space-y-2">
                   <Label htmlFor="register-confirm">Xác nhận mật khẩu</Label>
                   <Input

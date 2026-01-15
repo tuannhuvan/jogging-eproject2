@@ -13,10 +13,15 @@ import {
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
+// Form - Provider wrapper cho react-hook-form
+// Cung cấp context cho tất cả các form components con
 const Form = FormProvider
 
+// Context để chia sẻ tên field giữa các component
 const FormFieldContext = React.createContext({})
 
+// FormField - wrapper cho Controller của react-hook-form
+// Cung cấp context cho các component con biết field name
 const FormField = ({
   ...props
 }) => {
@@ -27,6 +32,7 @@ const FormField = ({
   )
 }
 
+// Hook để truy cập thông tin field và trạng thái validation
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
@@ -35,7 +41,7 @@ const useFormField = () => {
   const fieldState = getFieldState(fieldContext.name, formState)
 
   if (!fieldContext) {
-    throw new Error("useFormField should be used within ")
+    throw new Error("useFormField should be used within <FormField>")
   }
 
   const { id } = itemContext
@@ -50,8 +56,10 @@ const useFormField = () => {
   }
 }
 
+// Context để chia sẻ ID giữa các component trong FormItem
 const FormItemContext = React.createContext({})
 
+// FormItem - container cho một form field (label, control, description, message)
 function FormItem({ className, ...props }) {
   const id = React.useId()
 
@@ -66,6 +74,8 @@ function FormItem({ className, ...props }) {
   )
 }
 
+// FormLabel - label cho form field
+// Tự động đổi màu đỏ khi có lỗi validation
 function FormLabel({
   className,
   ...props
@@ -83,6 +93,8 @@ function FormLabel({
   )
 }
 
+// FormControl - wrapper cho input/select/etc
+// Tự động thêm các aria attributes cho accessibility
 function FormControl({ ...props }) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
 
@@ -101,6 +113,7 @@ function FormControl({ ...props }) {
   )
 }
 
+// FormDescription - mô tả/hướng dẫn cho field
 function FormDescription({ className, ...props }) {
   const { formDescriptionId } = useFormField()
 
@@ -114,6 +127,8 @@ function FormDescription({ className, ...props }) {
   )
 }
 
+// FormMessage - hiển thị thông báo lỗi validation
+// Tự động lấy message từ field error nếu có
 function FormMessage({ className, ...props }) {
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message ?? "") : props.children

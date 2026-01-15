@@ -1,7 +1,15 @@
 "use client"
+
+/**
+ * SIDEBAR COMPONENT - Thành phần thanh bên điều hướng
+ * 
+ * File này chứa tất cả các component liên quan đến sidebar (thanh bên)
+ * bao gồm: Provider, Menu, Header, Footer, và các thành phần con
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -22,21 +30,83 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+
+// ================== CẤU HÌNH SIDEBAR ==================
+// Tên cookie để lưu trạng thái sidebar (mở/đóng)
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
+// Thời gian lưu cookie: 7 ngày (tính bằng giây)
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+// Chiều rộng sidebar trên desktop
 const SIDEBAR_WIDTH = "16rem"
+// Chiều rộng sidebar trên mobile
 const SIDEBAR_WIDTH_MOBILE = "18rem"
+// Chiều rộng sidebar khi thu gọn (chỉ hiện icon)
 const SIDEBAR_WIDTH_ICON = "3rem"
+// Phím tắt để đóng/mở sidebar (Ctrl+B hoặc Cmd+B)
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
- path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+
+// ================== CONTEXT ==================
+// Context để chia sẻ trạng thái sidebar giữa các component
+const SidebarContext = React.createContext(null)
+
+/**
+ * Hook để sử dụng context của sidebar
+ * Phải được gọi bên trong SidebarProvider
+ */
+function useSidebar() {
+  const context = React.useContext(SidebarContext)
+  if (!context) {
+    throw new Error("useSidebar must be used within a SidebarProvider.")
+  }
+  return context
+}
+
+// ================== SIDEBAR PROVIDER ==================
+/**
+ * Component bao bọc cung cấp context cho sidebar
+ * @param {boolean} defaultOpen - Trạng thái mặc định (mở/đóng)
+ * @param {boolean} open - Trạng thái controlled từ bên ngoài
+ * @param {function} onOpenChange - Callback khi trạng thái thay đổi
+ */
+function SidebarProvider({
+  defaultOpen = true,
+  open: openProp,
+  onOpenChange: setOpenProp,
+  className,
+  style,
+  children,
+  ...props
+}) {
+  // Kiểm tra xem có đang ở chế độ mobile không
+  const isMobile = useIsMobile()
+  // Trạng thái mở/đóng cho mobile
+  const [openMobile, setOpenMobile] = React.useState(false)
+  // Trạng thái mở/đóng nội bộ (uncontrolled)
+  const [_open, _setOpen] = React.useState(defaultOpen)
+  // Sử dụng prop nếu có, không thì dùng state nội bộ
+  const open = openProp ?? _open
+
+  // Hàm đặt trạng thái mở/đóng và lưu vào cookie
+  const setOpen = React.useCallback(
+    (value) => {
+      const openState = typeof value === "function" ? value(open) : value
+      if (setOpenProp) {
+        setOpenProp(openState)
+      } else {
+        _setOpen(openState)
+      }
+      // Lưu trạng thái vào cookie để nhớ khi reload trang
+      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
     },
     [setOpenProp, open]
   )
-  // Helper to toggle the sidebar.
+
+  // Hàm toggle sidebar (đảo trạng thái mở/đóng)
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
-  // Adds a keyboard shortcut to toggle the sidebar.
+
+  // Lắng nghe phím tắt Ctrl+B / Cmd+B để toggle sidebar
   React.useEffect(() => {
     const handleKeyDown = (event) => {
       if (
@@ -50,9 +120,11 @@ const SIDEBAR_KEYBOARD_SHORTCUT = "b"
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [toggleSidebar])
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
+
+  // Trạng thái hiển thị: "expanded" (mở rộng) hoặc "collapsed" (thu gọn)
   const state = open ? "expanded" : "collapsed"
+
+  // Giá trị context được memo để tránh re-render không cần thiết
   const contextValue = React.useMemo(
     () => ({
       state,
@@ -65,18 +137,17 @@ const SIDEBAR_KEYBOARD_SHORTCUT = "b"
     }),
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
   )
+
   return (
     <SidebarContext.Provider value={contextValue}>
       <TooltipProvider delayDuration={0}>
         <div
           data-slot="sidebar-wrapper"
-          style={
-            {
-              "--sidebar-width",
-              "--sidebar-width-icon",
-              ...style,
-            }.CSSProperties
-          }
+          style={{
+            "--sidebar-width": SIDEBAR_WIDTH,
+            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+            ...style,
+          }}
           className={cn(
             "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
             className
@@ -89,6 +160,14 @@ const SIDEBAR_KEYBOARD_SHORTCUT = "b"
     </SidebarContext.Provider>
   )
 }
+
+// ================== SIDEBAR CHÍNH ==================
+/**
+ * Component sidebar chính
+ * @param {string} side - Vị trí: "left" (trái) hoặc "right" (phải)
+ * @param {string} variant - Kiểu hiển thị: "sidebar", "floating", "inset"
+ * @param {string} collapsible - Kiểu thu gọn: "offcanvas", "icon", "none"
+ */
 function Sidebar({
   side = "left",
   variant = "sidebar",
@@ -98,6 +177,8 @@ function Sidebar({
   ...props
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+
+  // Nếu không có chế độ thu gọn, hiển thị sidebar cố định
   if (collapsible === "none") {
     return (
       <div
@@ -112,6 +193,8 @@ function Sidebar({
       </div>
     )
   }
+
+  // Trên mobile: hiển thị dạng Sheet (drawer từ cạnh màn hình)
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
@@ -120,22 +203,22 @@ function Sidebar({
           data-slot="sidebar"
           data-mobile="true"
           className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              "--sidebar-width",
-            }.CSSProperties
-          }
+          style={{
+            "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+          }}
           side={side}
         >
           <SheetHeader className="sr-only">
-            Sidebar</SheetTitle>
-            Displays the mobile sidebar.</SheetDescription>
+            <SheetTitle>Sidebar</SheetTitle>
+            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>
     )
   }
+
+  // Trên desktop: hiển thị sidebar cố định bên cạnh
   return (
     <div
       className="group peer text-sidebar-foreground hidden md:block"
@@ -145,7 +228,7 @@ function Sidebar({
       data-side={side}
       data-slot="sidebar"
     >
-      {/* This is what handles the sidebar gap on desktop */}
+      {/* Div tạo khoảng trống cho sidebar */}
       <div
         data-slot="sidebar-gap"
         className={cn(
@@ -157,6 +240,7 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
         )}
       />
+      {/* Container chứa nội dung sidebar */}
       <div
         data-slot="sidebar-container"
         className={cn(
@@ -164,7 +248,6 @@ function Sidebar({
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-          // Adjust the padding for floating and inset variants.
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -183,11 +266,12 @@ function Sidebar({
     </div>
   )
 }
-function SidebarTrigger({
-  className,
-  onClick,
-  ...props
-}) {
+
+// ================== NÚT TOGGLE SIDEBAR ==================
+/**
+ * Nút để đóng/mở sidebar
+ */
+function SidebarTrigger({ className, onClick, ...props }) {
   const { toggleSidebar } = useSidebar()
   return (
     <Button
@@ -207,6 +291,11 @@ function SidebarTrigger({
     </Button>
   )
 }
+
+// ================== THANH KÉO SIDEBAR ==================
+/**
+ * Thanh kéo ở cạnh sidebar để resize/toggle
+ */
 function SidebarRail({ className, ...props }) {
   const { toggleSidebar } = useSidebar()
   return (
@@ -230,6 +319,11 @@ function SidebarRail({ className, ...props }) {
     />
   )
 }
+
+// ================== VÙNG NỘI DUNG CHÍNH ==================
+/**
+ * Vùng nội dung chính bên cạnh sidebar
+ */
 function SidebarInset({ className, ...props }) {
   return (
     <main
@@ -243,10 +337,12 @@ function SidebarInset({ className, ...props }) {
     />
   )
 }
-function SidebarInput({
-  className,
-  ...props
-}) {
+
+// ================== Ô INPUT TÌM KIẾM ==================
+/**
+ * Ô input để tìm kiếm trong sidebar
+ */
+function SidebarInput({ className, ...props }) {
   return (
     <Input
       data-slot="sidebar-input"
@@ -256,6 +352,11 @@ function SidebarInput({
     />
   )
 }
+
+// ================== HEADER SIDEBAR ==================
+/**
+ * Phần đầu của sidebar (logo, tiêu đề, ...)
+ */
 function SidebarHeader({ className, ...props }) {
   return (
     <div
@@ -266,6 +367,11 @@ function SidebarHeader({ className, ...props }) {
     />
   )
 }
+
+// ================== FOOTER SIDEBAR ==================
+/**
+ * Phần cuối của sidebar (user info, settings, ...)
+ */
 function SidebarFooter({ className, ...props }) {
   return (
     <div
@@ -276,10 +382,12 @@ function SidebarFooter({ className, ...props }) {
     />
   )
 }
-function SidebarSeparator({
-  className,
-  ...props
-}) {
+
+// ================== ĐƯỜNG PHÂN CÁCH ==================
+/**
+ * Đường kẻ phân cách giữa các phần trong sidebar
+ */
+function SidebarSeparator({ className, ...props }) {
   return (
     <Separator
       data-slot="sidebar-separator"
@@ -289,6 +397,11 @@ function SidebarSeparator({
     />
   )
 }
+
+// ================== NỘI DUNG SIDEBAR ==================
+/**
+ * Vùng chứa nội dung chính của sidebar (menu, links, ...)
+ */
 function SidebarContent({ className, ...props }) {
   return (
     <div
@@ -302,6 +415,11 @@ function SidebarContent({ className, ...props }) {
     />
   )
 }
+
+// ================== NHÓM MENU ==================
+/**
+ * Nhóm các mục menu liên quan với nhau
+ */
 function SidebarGroup({ className, ...props }) {
   return (
     <div
@@ -312,11 +430,11 @@ function SidebarGroup({ className, ...props }) {
     />
   )
 }
-function SidebarGroupLabel({
-  className,
-  asChild = false,
-  ...props
-}) {
+
+/**
+ * Nhãn/tiêu đề của nhóm menu
+ */
+function SidebarGroupLabel({ className, asChild = false, ...props }) {
   const Comp = asChild ? Slot : "div"
   return (
     <Comp
@@ -331,11 +449,11 @@ function SidebarGroupLabel({
     />
   )
 }
-function SidebarGroupAction({
-  className,
-  asChild = false,
-  ...props
-}) {
+
+/**
+ * Nút hành động của nhóm menu (ví dụ: nút thêm mới)
+ */
+function SidebarGroupAction({ className, asChild = false, ...props }) {
   const Comp = asChild ? Slot : "button"
   return (
     <Comp
@@ -343,7 +461,6 @@ function SidebarGroupAction({
       data-sidebar="group-action"
       className={cn(
         "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground absolute top-3.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 md:after:hidden",
         "group-data-[collapsible=icon]:hidden",
         className
@@ -352,10 +469,11 @@ function SidebarGroupAction({
     />
   )
 }
-function SidebarGroupContent({
-  className,
-  ...props
-}) {
+
+/**
+ * Nội dung của nhóm menu
+ */
+function SidebarGroupContent({ className, ...props }) {
   return (
     <div
       data-slot="sidebar-group-content"
@@ -365,6 +483,11 @@ function SidebarGroupContent({
     />
   )
 }
+
+// ================== MENU ==================
+/**
+ * Container danh sách menu
+ */
 function SidebarMenu({ className, ...props }) {
   return (
     <ul
@@ -375,6 +498,10 @@ function SidebarMenu({ className, ...props }) {
     />
   )
 }
+
+/**
+ * Một mục trong menu
+ */
 function SidebarMenuItem({ className, ...props }) {
   return (
     <li
@@ -385,15 +512,19 @@ function SidebarMenuItem({ className, ...props }) {
     />
   )
 }
+
+// Định nghĩa các biến thể (variants) cho nút menu
 const sidebarMenuButtonVariants = cva(
   "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
+      // Kiểu hiển thị
       variant: {
         default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
+      // Kích thước
       size: {
         default: "h-8 text-sm",
         sm: "h-7 text-xs",
@@ -406,6 +537,12 @@ const sidebarMenuButtonVariants = cva(
     },
   }
 )
+
+/**
+ * Nút trong menu sidebar
+ * @param {boolean} isActive - Đánh dấu mục đang được chọn
+ * @param {string} tooltip - Nội dung tooltip khi hover
+ */
 function SidebarMenuButton({
   asChild = false,
   isActive = false,
@@ -414,9 +551,10 @@ function SidebarMenuButton({
   tooltip,
   className,
   ...props
-} & VariantProps<typeof sidebarMenuButtonVariants>) {
+}) {
   const Comp = asChild ? Slot : "button"
   const { isMobile, state } = useSidebar()
+
   const button = (
     <Comp
       data-slot="sidebar-menu-button"
@@ -427,16 +565,23 @@ function SidebarMenuButton({
       {...props}
     />
   )
+
+  // Nếu không có tooltip, trả về button đơn giản
   if (!tooltip) {
     return button
   }
+
+  // Chuyển tooltip string thành object
   if (typeof tooltip === "string") {
     tooltip = {
       children: tooltip,
     }
   }
+
+  // Wrap button với Tooltip
   return (
-      {button}</TooltipTrigger>
+    <Tooltip>
+      <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent
         side="right"
         align="center"
@@ -446,6 +591,11 @@ function SidebarMenuButton({
     </Tooltip>
   )
 }
+
+/**
+ * Nút hành động trong menu (ví dụ: nút xóa, chỉnh sửa)
+ * @param {boolean} showOnHover - Chỉ hiện khi hover vào menu item
+ */
 function SidebarMenuAction({
   className,
   asChild = false,
@@ -459,7 +609,6 @@ function SidebarMenuAction({
       data-sidebar="menu-action"
       className={cn(
         "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 md:after:hidden",
         "peer-data-[size=sm]/menu-button:top-1",
         "peer-data-[size=default]/menu-button:top-1.5",
@@ -473,10 +622,11 @@ function SidebarMenuAction({
     />
   )
 }
-function SidebarMenuBadge({
-  className,
-  ...props
-}) {
+
+/**
+ * Badge hiển thị số/trạng thái bên cạnh menu item
+ */
+function SidebarMenuBadge({ className, ...props }) {
   return (
     <div
       data-slot="sidebar-menu-badge"
@@ -494,15 +644,17 @@ function SidebarMenuBadge({
     />
   )
 }
-function SidebarMenuSkeleton({
-  className,
-  showIcon = false,
-  ...props
-}) {
-  // Random width between 50 to 90%.
+
+/**
+ * Skeleton loading cho menu item
+ * @param {boolean} showIcon - Hiển thị skeleton cho icon
+ */
+function SidebarMenuSkeleton({ className, showIcon = false, ...props }) {
+  // Tạo chiều rộng ngẫu nhiên từ 50% đến 90%
   const width = React.useMemo(() => {
     return `${Math.floor(Math.random() * 40) + 50}%`
   }, [])
+
   return (
     <div
       data-slot="sidebar-menu-skeleton"
@@ -519,15 +671,18 @@ function SidebarMenuSkeleton({
       <Skeleton
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
-        style={
-          {
-            "--skeleton-width": width,
-          }.CSSProperties
-        }
+        style={{
+          "--skeleton-width": width,
+        }}
       />
     </div>
   )
 }
+
+// ================== MENU PHỤ (SUBMENU) ==================
+/**
+ * Container cho menu phụ (submenu)
+ */
 function SidebarMenuSub({ className, ...props }) {
   return (
     <ul
@@ -542,10 +697,11 @@ function SidebarMenuSub({ className, ...props }) {
     />
   )
 }
-function SidebarMenuSubItem({
-  className,
-  ...props
-}) {
+
+/**
+ * Một mục trong menu phụ
+ */
+function SidebarMenuSubItem({ className, ...props }) {
   return (
     <li
       data-slot="sidebar-menu-sub-item"
@@ -555,6 +711,12 @@ function SidebarMenuSubItem({
     />
   )
 }
+
+/**
+ * Nút trong menu phụ
+ * @param {string} size - Kích thước: "sm", "md"
+ * @param {boolean} isActive - Đánh dấu mục đang được chọn
+ */
 function SidebarMenuSubButton({
   asChild = false,
   size = "md",
@@ -581,6 +743,8 @@ function SidebarMenuSubButton({
     />
   )
 }
+
+// ================== EXPORT ==================
 export {
   Sidebar,
   SidebarContent,

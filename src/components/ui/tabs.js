@@ -2,6 +2,12 @@
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 import { cn } from "@/lib/utils"
+
+// Tabs - component tabs điều hướng nội dung
+// Sử dụng Radix UI TabsPrimitive làm nền tảng
+// Cho phép chuyển đổi giữa các panel nội dung
+
+// Tabs - container chính
 function Tabs({
   className,
   ...props
@@ -14,6 +20,8 @@ function Tabs({
     />
   )
 }
+
+// TabsList - danh sách các tab buttons
 function TabsList({
   className,
   ...props
@@ -29,6 +37,9 @@ function TabsList({
     />
   )
 }
+
+// TabsTrigger - mỗi tab button
+// Có highlight khi active và focus state
 function TabsTrigger({
   className,
   ...props
@@ -44,6 +55,9 @@ function TabsTrigger({
     />
   )
 }
+
+// TabsContent - nội dung của mỗi tab
+// Chỉ hiển thị khi tab tương ứng được chọn
 function TabsContent({
   className,
   ...props
@@ -56,4 +70,5 @@ function TabsContent({
     />
   )
 }
+
 export { Tabs, TabsList, TabsTrigger, TabsContent }

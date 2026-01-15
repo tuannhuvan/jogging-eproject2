@@ -4,6 +4,7 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 
+// ItemGroup - container cho danh sách các Item
 function ItemGroup({ className, ...props }) {
   return (
     <div
@@ -15,6 +16,7 @@ function ItemGroup({ className, ...props }) {
   )
 }
 
+// ItemSeparator - đường phân cách giữa các Item
 function ItemSeparator({
   className,
   ...props
@@ -29,6 +31,9 @@ function ItemSeparator({
   )
 }
 
+// Variants styling cho Item
+// - variant: default (trong suốt), outline (có viền), muted (có nền nhạt)
+// - size: default (padding lớn), sm (padding nhỏ)
 const itemVariants = cva(
   "group/item flex items-center border border-transparent text-sm rounded-md transition-colors [a]:hover:bg-accent/50 [a]:transition-colors duration-100 flex-wrap outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
   {
@@ -50,6 +55,11 @@ const itemVariants = cva(
   }
 )
 
+// Item - component hiển thị một mục trong danh sách
+// Props:
+// - variant: kiểu hiển thị (default/outline/muted)
+// - size: kích thước (default/sm)
+// - asChild: sử dụng element con làm gốc
 function Item({
   className,
   variant = "default",
@@ -69,6 +79,10 @@ function Item({
   )
 }
 
+// Variants styling cho ItemMedia
+// - default: không có styling đặc biệt
+// - icon: khung vuông với icon bên trong
+// - image: khung vuông chứa hình ảnh
 const itemMediaVariants = cva(
   "flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none group-has-[[data-slot=item-description]]/item:translate-y-0.5",
   {
@@ -86,6 +100,7 @@ const itemMediaVariants = cva(
   }
 )
 
+// ItemMedia - hiển thị icon hoặc hình ảnh của item
 function ItemMedia({
   className,
   variant = "default",
@@ -101,6 +116,7 @@ function ItemMedia({
   )
 }
 
+// ItemContent - nội dung chính của item (title + description)
 function ItemContent({ className, ...props }) {
   return (
     <div
@@ -114,6 +130,7 @@ function ItemContent({ className, ...props }) {
   )
 }
 
+// ItemTitle - tiêu đề của item
 function ItemTitle({ className, ...props }) {
   return (
     <div
@@ -127,6 +144,7 @@ function ItemTitle({ className, ...props }) {
   )
 }
 
+// ItemDescription - mô tả của item (giới hạn 2 dòng)
 function ItemDescription({ className, ...props }) {
   return (
     <p
@@ -141,6 +159,7 @@ function ItemDescription({ className, ...props }) {
   )
 }
 
+// ItemActions - container cho các action buttons của item
 function ItemActions({ className, ...props }) {
   return (
     <div
@@ -151,6 +170,7 @@ function ItemActions({ className, ...props }) {
   )
 }
 
+// ItemHeader - phần header của item (toàn bộ chiều rộng)
 function ItemHeader({ className, ...props }) {
   return (
     <div
@@ -164,6 +184,7 @@ function ItemHeader({ className, ...props }) {
   )
 }
 
+// ItemFooter - phần footer của item (toàn bộ chiều rộng)
 function ItemFooter({ className, ...props }) {
   return (
     <div

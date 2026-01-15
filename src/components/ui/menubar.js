@@ -1,8 +1,14 @@
 "use client"
+
 import * as React from "react"
 import * as MenubarPrimitive from "@radix-ui/react-menubar"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+
 import { cn } from "@/lib/utils"
+
+// Menubar - thanh menu ngang chứa các dropdown menu
+// Sử dụng Radix UI MenubarPrimitive làm nền tảng
+// Thường dùng cho menu ứng dụng như File, Edit, View, etc.
 function Menubar({
   className,
   ...props
@@ -18,28 +24,15 @@ function Menubar({
     />
   )
 }
+
+// MenubarMenu - mỗi menu trong menubar
 function MenubarMenu({
   ...props
 }) {
   return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />
 }
-function MenubarGroup({
-  ...props
-}) {
-  return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />
-}
-function MenubarPortal({
-  ...props
-}) {
-  return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />
-}
-function MenubarRadioGroup({
-  ...props
-}) {
-  return (
-    <MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />
-  )
-}
+
+// MenubarTrigger - nút kích hoạt mở menu
 function MenubarTrigger({
   className,
   ...props
@@ -55,6 +48,56 @@ function MenubarTrigger({
     />
   )
 }
+
+// MenubarPortal - render menu content vào portal
+function MenubarPortal({
+  ...props
+}) {
+  return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />
+}
+
+// MenubarSubTrigger - nút kích hoạt submenu
+// Có icon mũi tên chỉ sang phải
+function MenubarSubTrigger({
+  className,
+  inset,
+  children,
+  ...props
+}) {
+  return (
+    <MenubarPrimitive.SubTrigger
+      data-slot="menubar-sub-trigger"
+      data-inset={inset}
+      className={cn(
+        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <ChevronRightIcon className="ml-auto" />
+    </MenubarPrimitive.SubTrigger>
+  )
+}
+
+// MenubarSubContent - nội dung của submenu
+function MenubarSubContent({
+  className,
+  ...props
+}) {
+  return (
+    <MenubarPrimitive.SubContent
+      data-slot="menubar-sub-content"
+      className={cn(
+        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border p-1 shadow-lg",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+// MenubarContent - nội dung chính của menu dropdown
 function MenubarContent({
   className,
   align = "start",
@@ -63,6 +106,7 @@ function MenubarContent({
   ...props
 }) {
   return (
+    <MenubarPrimitive.Portal>
       <MenubarPrimitive.Content
         data-slot="menubar-content"
         align={align}
@@ -74,9 +118,14 @@ function MenubarContent({
         )}
         {...props}
       />
-    </MenubarPortal>
+    </MenubarPrimitive.Portal>
   )
 }
+
+// MenubarItem - mỗi item trong menu
+// Props:
+// - inset: thêm padding trái
+// - variant: default hoặc destructive
 function MenubarItem({
   className,
   inset,
@@ -96,6 +145,8 @@ function MenubarItem({
     />
   )
 }
+
+// MenubarCheckboxItem - item có checkbox
 function MenubarCheckboxItem({
   className,
   children,
@@ -106,7 +157,7 @@ function MenubarCheckboxItem({
     <MenubarPrimitive.CheckboxItem
       data-slot="menubar-checkbox-item"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       checked={checked}
@@ -121,6 +172,20 @@ function MenubarCheckboxItem({
     </MenubarPrimitive.CheckboxItem>
   )
 }
+
+// MenubarRadioGroup - nhóm radio items
+function MenubarRadioGroup({
+  ...props
+}) {
+  return (
+    <MenubarPrimitive.RadioGroup
+      data-slot="menubar-radio-group"
+      {...props}
+    />
+  )
+}
+
+// MenubarRadioItem - item dạng radio
 function MenubarRadioItem({
   className,
   children,
@@ -130,7 +195,7 @@ function MenubarRadioItem({
     <MenubarPrimitive.RadioItem
       data-slot="menubar-radio-item"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -144,6 +209,8 @@ function MenubarRadioItem({
     </MenubarPrimitive.RadioItem>
   )
 }
+
+// MenubarLabel - label/heading cho nhóm items
 function MenubarLabel({
   className,
   inset,
@@ -161,6 +228,8 @@ function MenubarLabel({
     />
   )
 }
+
+// MenubarSeparator - đường phân cách
 function MenubarSeparator({
   className,
   ...props
@@ -173,6 +242,8 @@ function MenubarSeparator({
     />
   )
 }
+
+// MenubarShortcut - hiển thị phím tắt
 function MenubarShortcut({
   className,
   ...props
@@ -188,62 +259,36 @@ function MenubarShortcut({
     />
   )
 }
+
+// MenubarGroup - nhóm các items
+function MenubarGroup({
+  ...props
+}) {
+  return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />
+}
+
+// MenubarSub - submenu lồng nhau
 function MenubarSub({
   ...props
 }) {
   return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />
 }
-function MenubarSubTrigger({
-  className,
-  inset,
-  children,
-  ...props
-}) {
-  return (
-    <MenubarPrimitive.SubTrigger
-      data-slot="menubar-sub-trigger"
-      data-inset={inset}
-      className={cn(
-        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[inset]:pl-8",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <ChevronRightIcon className="ml-auto h-4 w-4" />
-    </MenubarPrimitive.SubTrigger>
-  )
-}
-function MenubarSubContent({
-  className,
-  ...props
-}) {
-  return (
-    <MenubarPrimitive.SubContent
-      data-slot="menubar-sub-content"
-      className={cn(
-        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border p-1 shadow-lg",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+
 export {
   Menubar,
   MenubarPortal,
   MenubarMenu,
   MenubarTrigger,
   MenubarContent,
-  MenubarGroup,
+  MenubarItem,
   MenubarSeparator,
   MenubarLabel,
-  MenubarItem,
-  MenubarShortcut,
   MenubarCheckboxItem,
   MenubarRadioGroup,
   MenubarRadioItem,
+  MenubarShortcut,
+  MenubarGroup,
   MenubarSub,
-  MenubarSubTrigger,
   MenubarSubContent,
+  MenubarSubTrigger,
 }

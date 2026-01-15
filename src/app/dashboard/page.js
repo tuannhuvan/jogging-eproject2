@@ -1,5 +1,18 @@
 "use client"
 
+/**
+ * DASHBOARD PAGE - Trang dashboard cá nhân người dùng
+ * 
+ * Trang này hiển thị:
+ * - Thông tin cá nhân và avatar
+ * - Thống kê hoạt động (giải chạy, đơn hàng, đánh giá, bình luận)
+ * - Tabs: Tổng quan, Giải chạy, Đơn hàng, Hoạt động, Thành viên
+ * - Form chỉnh sửa thông tin cá nhân
+ * 
+ * Route: /dashboard
+ * Yêu cầu: Đăng nhập
+ */
+
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
@@ -26,35 +39,46 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-// Trang dashboard cá nhân của người dùng
+/**
+ * Component trang dashboard cá nhân
+ * Hiển thị và quản lý thông tin người dùng
+ */
 export default function DashboardPage() {
+  // Lấy thông tin auth từ AuthContext
   const { user, profile, signOut, loading: authLoading } = useAuth()
   const router = useRouter()
+  // State theo dõi trạng thái đang tải
   const [loading, setLoading] = useState(true)
+  // State lưu thống kê hoạt động
   const [stats, setStats] = useState({
-    totalOrders: 0,
-    totalEvents: 0,
-    totalReviews: 0,
-    totalComments: 0
+    totalOrders: 0,     // Tổng đơn hàng
+    totalEvents: 0,     // Tổng giải chạy đã đăng ký
+    totalReviews: 0,    // Tổng đánh giá
+    totalComments: 0    // Tổng bình luận
   })
+  // State tab đang active
   const [activeTab, setActiveTab] = useState('overview')
+  // State toggle form chỉnh sửa
   const [editProfile, setEditProfile] = useState(false)
+  // State dữ liệu form
   const [formData, setFormData] = useState({})
 
-  // Lists for display
+  // Danh sách dữ liệu để hiển thị
   const [orders, setOrders] = useState([])
   const [registrations, setRegistrations] = useState([])
   const [clubs, setClubs] = useState([])
   const [reviews, setReviews] = useState([])
   const [comments, setComments] = useState([])
 
-  // Tải dữ liệu dashboard khi component được gắn kết
+  // Effect: Kiểm tra đăng nhập và tải dữ liệu
   useEffect(() => {
+    // Chuyển hướng nếu chưa đăng nhập
     if (!authLoading && !user) {
       router.push('/dang-nhap')
       return
     }
 
+    // Nếu đã đăng nhập, tải dữ liệu
     if (user && profile) {
       setFormData({
         full_name: profile.full_name || '',
@@ -70,12 +94,14 @@ export default function DashboardPage() {
     }
   }, [user, profile, authLoading])
 
-  // Hàm tải dữ liệu dashboard
+  /**
+   * Hàm tải dữ liệu dashboard từ Supabase
+   */
   async function fetchDashboardData() {
     try {
       setLoading(true)
       
-      // Fetch Orders
+      // Tải đơn hàng của user
       const { data: ordersData } = await supabase
         .from('orders')
         .select('*')
@@ -83,34 +109,35 @@ export default function DashboardPage() {
         .order('created_at', { ascending: false })
       setOrders(ordersData || [])
 
-      // Fetch Registrations
+      // Tải danh sách giải chạy đã đăng ký
       const { data: regsData } = await supabase
         .from('registrations')
         .select('*, events(*)')
         .eq('user_id', user.id)
       setRegistrations(regsData || [])
 
-      // Fetch Clubs
+      // Tải thông tin CLB nếu có
       const { data: clubsData } = await supabase
         .from('clubs')
         .select('*')
         .eq('id', profile.club_id)
       setClubs(clubsData || [])
 
-      // Fetch Reviews
+      // Tải đánh giá sản phẩm
       const { data: reviewsData } = await supabase
         .from('reviews')
         .select('*, products(name)')
         .eq('user_id', user.id)
       setReviews(reviewsData || [])
 
-      // Fetch Comments
+      // Tải bình luận bài viết
       const { data: commentsData } = await supabase
         .from('comments')
         .select('*, posts(title)')
         .eq('user_id', user.id)
       setComments(commentsData || [])
 
+      // Cập nhật thống kê
       setStats({
         totalOrders: ordersData?.length || 0,
         totalEvents: regsData?.length || 0,
@@ -124,7 +151,10 @@ export default function DashboardPage() {
     }
   }
 
-  // Hàm xử lý cập nhật hồ sơ người dùng
+  /**
+   * Hàm xử lý cập nhật thông tin cá nhân
+   * @param {Event} e - Sự kiện submit form
+   */
   const handleUpdateProfile = async (e) => {
     e.preventDefault()
     try {
@@ -150,8 +180,13 @@ export default function DashboardPage() {
     }
   }
 
-  // Hàm xử lý hủy đăng ký giải chạy
+  /**
+   * Hàm xử lý hủy đăng ký giải chạy
+   * @param {number} id - ID đăng ký
+   * @param {string} status - Trạng thái thanh toán
+   */
   async function handleCancelRegistration(id, status) {
+    // Không cho hủy nếu đã thanh toán
     if (status === 'paid') {
       toast.error('Không thể hủy đăng ký đã thanh toán')
       return
@@ -173,23 +208,26 @@ export default function DashboardPage() {
     }
   }
 
+  // Hiển thị loading
   if (authLoading || loading) {
     return <div className="min-h-screen flex items-center justify-center">Đang tải...</div>
   }
 
-  // Hiển thị nội dung trang dashboard
   return (
     <div className="min-h-screen bg-muted/30 pb-12">
-      {/* Header Section */}
+      {/* Header Section - Thông tin user */}
       <div className="bg-white border-b pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-6">
+            {/* Avatar */}
             <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary border-4 border-white shadow-lg">
               <User size={48} />
             </div>
+            {/* Thông tin */}
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-3xl font-bold">{profile?.full_name || 'Vận động viên'}</h1>
               <p className="text-muted-foreground">{profile?.email}</p>
+              {/* Badges */}
               <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
                 <Badge variant="outline" className="bg-white">ID: {user?.id.slice(0, 8)}</Badge>
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
@@ -202,6 +240,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
+            {/* Nút thao tác */}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setEditProfile(!editProfile)}>
                 <Settings size={18} className="mr-2" /> {editProfile ? 'Hủy' : 'Sửa hồ sơ'}
@@ -216,7 +255,7 @@ export default function DashboardPage() {
 
       <div className="container mx-auto px-4 mt-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar Stats */}
+          {/* Sidebar - Thống kê */}
           <div className="md:col-span-1 space-y-4">
             <Card>
               <CardHeader className="pb-2">
@@ -250,6 +289,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
+            {/* Quick links */}
             <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
               <Button variant="secondary" className="w-full justify-start" asChild>
                 <a href="/shop"><ShoppingBag className="mr-2 h-4 w-4" /> Mua sắm</a>
@@ -266,6 +306,7 @@ export default function DashboardPage() {
           {/* Main Content */}
           <div className="md:col-span-3">
             {editProfile ? (
+              // Form chỉnh sửa thông tin
               <Card>
                 <CardHeader>
                   <CardTitle>Cập nhật thông tin cá nhân</CardTitle>
@@ -349,6 +390,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             ) : (
+              // Tabs hiển thị thông tin
               <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="grid w-full grid-cols-5 mb-6">
                   <TabsTrigger value="overview">Tổng quan</TabsTrigger>
@@ -358,8 +400,10 @@ export default function DashboardPage() {
                   <TabsTrigger value="membership">Thành viên</TabsTrigger>
                 </TabsList>
 
+                {/* Tab Tổng quan */}
                 <TabsContent value="overview">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Card thông tin cá nhân */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
@@ -390,6 +434,7 @@ export default function DashboardPage() {
                       </CardContent>
                     </Card>
 
+                    {/* Card chỉ số hoạt động */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
@@ -431,6 +476,7 @@ export default function DashboardPage() {
                   </div>
                 </TabsContent>
 
+                {/* Tab Giải chạy */}
                 <TabsContent value="events">
                   <Card>
                     <CardHeader>
@@ -489,6 +535,7 @@ export default function DashboardPage() {
                   </Card>
                 </TabsContent>
 
+                {/* Tab Đơn hàng */}
                 <TabsContent value="orders">
                   <Card>
                     <CardHeader>
@@ -524,8 +571,10 @@ export default function DashboardPage() {
                   </Card>
                 </TabsContent>
 
+                {/* Tab Hoạt động */}
                 <TabsContent value="activities">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Đánh giá sản phẩm */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">Đánh giá sản phẩm</CardTitle>
@@ -553,6 +602,7 @@ export default function DashboardPage() {
                       </CardContent>
                     </Card>
 
+                    {/* Bình luận bài viết */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">Bình luận bài viết</CardTitle>
@@ -576,6 +626,7 @@ export default function DashboardPage() {
                   </div>
                 </TabsContent>
 
+                {/* Tab Thành viên */}
                 <TabsContent value="membership">
                   <Card>
                     <CardHeader>

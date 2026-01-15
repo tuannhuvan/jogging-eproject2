@@ -3,11 +3,21 @@ import * as React from "react"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+// Context-menu UI (Giao diện menu ngữ cảnh) là một menu bật lên chứa các lệnh 
+// hoặc hành động liên quan trực tiếp đến một đối tượng, tệp tin, 
+// hoặc khu vực cụ thể mà người dùng đang tương tác, thay vì hiển thị các lệnh chung chung.
+// Menu này xuất hiện khi người dùng nhấp chuột phải (trên PC) hoặc thực hiện cử chỉ tương ứng 
+// (nhấn giữ trên màn hình cảm ứng), giúp truy cập nhanh các chức năng thường dùng mà không làm lộn xộn giao diện chính. 
+// ContextMenu - menu ngữ cảnh hiện khi click chuột phải
+// Sử dụng Radix UI ContextMenuPrimitive làm nền tảng
 function ContextMenu({
   ...props
 }) {
   return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />
 }
+
+// ContextMenuTrigger - vùng kích hoạt menu (click phải để mở)
 function ContextMenuTrigger({
   ...props
 }) {
@@ -15,6 +25,8 @@ function ContextMenuTrigger({
     <ContextMenuPrimitive.Trigger data-slot="context-menu-trigger" {...props} />
   )
 }
+
+// ContextMenuGroup - nhóm các menu items
 function ContextMenuGroup({
   ...props
 }) {
@@ -22,6 +34,8 @@ function ContextMenuGroup({
     <ContextMenuPrimitive.Group data-slot="context-menu-group" {...props} />
   )
 }
+
+// ContextMenuPortal - render menu vào portal
 function ContextMenuPortal({
   ...props
 }) {
@@ -29,11 +43,15 @@ function ContextMenuPortal({
     <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />
   )
 }
+
+// ContextMenuSub - submenu lồng nhau
 function ContextMenuSub({
   ...props
 }) {
   return <ContextMenuPrimitive.Sub data-slot="context-menu-sub" {...props} />
 }
+
+// ContextMenuRadioGroup - nhóm radio items (chỉ chọn được 1)
 function ContextMenuRadioGroup({
   ...props
 }) {
@@ -44,6 +62,9 @@ function ContextMenuRadioGroup({
     />
   )
 }
+
+// ContextMenuSubTrigger - nút kích hoạt mở submenu
+// Có icon mũi tên chỉ sang phải
 function ContextMenuSubTrigger({
   className,
   inset,
@@ -65,6 +86,8 @@ function ContextMenuSubTrigger({
     </ContextMenuPrimitive.SubTrigger>
   )
 }
+
+// ContextMenuSubContent - nội dung của submenu
 function ContextMenuSubContent({
   className,
   ...props
@@ -80,6 +103,8 @@ function ContextMenuSubContent({
     />
   )
 }
+
+// ContextMenuContent - nội dung chính của context menu
 function ContextMenuContent({
   className,
   ...props
@@ -97,6 +122,11 @@ function ContextMenuContent({
     </ContextMenuPrimitive.Portal>
   )
 }
+
+// ContextMenuItem - mỗi item trong menu
+// Props:
+// - inset: thêm padding trái để căn với checkbox/radio items
+// - variant: default hoặc destructive (cho hành động nguy hiểm)
 function ContextMenuItem({
   className,
   inset,
@@ -116,6 +146,9 @@ function ContextMenuItem({
     />
   )
 }
+
+// ContextMenuCheckboxItem - item có checkbox
+// Hiển thị dấu tick khi checked
 function ContextMenuCheckboxItem({
   className,
   children,
@@ -141,6 +174,9 @@ function ContextMenuCheckboxItem({
     </ContextMenuPrimitive.CheckboxItem>
   )
 }
+
+// ContextMenuRadioItem - item dạng radio (chỉ chọn 1 trong nhóm)
+// Hiển thị dot khi selected
 function ContextMenuRadioItem({
   className,
   children,
@@ -164,6 +200,8 @@ function ContextMenuRadioItem({
     </ContextMenuPrimitive.RadioItem>
   )
 }
+
+// ContextMenuLabel - label/heading cho nhóm items
 function ContextMenuLabel({
   className,
   inset,
@@ -181,6 +219,8 @@ function ContextMenuLabel({
     />
   )
 }
+
+// ContextMenuSeparator - đường phân cách giữa các nhóm
 function ContextMenuSeparator({
   className,
   ...props
@@ -193,6 +233,8 @@ function ContextMenuSeparator({
     />
   )
 }
+
+// ContextMenuShortcut - hiển thị phím tắt bên phải
 function ContextMenuShortcut({
   className,
   ...props
@@ -208,6 +250,7 @@ function ContextMenuShortcut({
     />
   )
 }
+
 export {
   ContextMenu,
   ContextMenuTrigger,

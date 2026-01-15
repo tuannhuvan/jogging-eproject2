@@ -6,12 +6,16 @@ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// DropdownMenu - menu dropdown khi click (Dropdown (Menu thả xuống): Một danh sách các lựa chọn xuất hiện khi nhấp vào,
+// thường dùng để chọn một giá trị duy nhất)
+// Sử dụng Radix UI DropdownMenuPrimitive làm nền tảng
 function DropdownMenu({
   ...props
 }) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
 }
 
+// DropdownMenuPortal - render menu vào portal
 function DropdownMenuPortal({
   ...props
 }) {
@@ -20,6 +24,7 @@ function DropdownMenuPortal({
   )
 }
 
+// DropdownMenuTrigger - nút kích hoạt mở menu
 function DropdownMenuTrigger({
   ...props
 }) {
@@ -31,6 +36,9 @@ function DropdownMenuTrigger({
   )
 }
 
+// DropdownMenuContent - nội dung chính của dropdown menu
+// Props:
+// - sideOffset: khoảng cách từ trigger (mặc định: 4px)
 function DropdownMenuContent({
   className,
   sideOffset = 4,
@@ -51,6 +59,7 @@ function DropdownMenuContent({
   )
 }
 
+// DropdownMenuGroup - nhóm các menu items
 function DropdownMenuGroup({
   ...props
 }) {
@@ -59,6 +68,10 @@ function DropdownMenuGroup({
   )
 }
 
+// DropdownMenuItem - mỗi item trong menu
+// Props:
+// - inset: thêm padding trái để căn với checkbox/radio items
+// - variant: default hoặc destructive (cho hành động nguy hiểm)
 function DropdownMenuItem({
   className,
   inset,
@@ -79,6 +92,8 @@ function DropdownMenuItem({
   )
 }
 
+// DropdownMenuCheckboxItem - item có checkbox
+// Hiển thị dấu tick khi checked
 function DropdownMenuCheckboxItem({
   className,
   children,
@@ -105,6 +120,7 @@ function DropdownMenuCheckboxItem({
   )
 }
 
+// DropdownMenuRadioGroup - nhóm radio items (chỉ chọn được 1)
 function DropdownMenuRadioGroup({
   ...props
 }) {
@@ -116,6 +132,8 @@ function DropdownMenuRadioGroup({
   )
 }
 
+// DropdownMenuRadioItem - item dạng radio
+// Hiển thị dot khi selected
 function DropdownMenuRadioItem({
   className,
   children,
@@ -140,6 +158,7 @@ function DropdownMenuRadioItem({
   )
 }
 
+// DropdownMenuLabel - label/heading cho nhóm items
 function DropdownMenuLabel({
   className,
   inset,
@@ -158,6 +177,7 @@ function DropdownMenuLabel({
   )
 }
 
+// DropdownMenuSeparator - đường phân cách giữa các nhóm
 function DropdownMenuSeparator({
   className,
   ...props
@@ -171,6 +191,7 @@ function DropdownMenuSeparator({
   )
 }
 
+// DropdownMenuShortcut - hiển thị phím tắt bên phải
 function DropdownMenuShortcut({
   className,
   ...props
@@ -187,12 +208,15 @@ function DropdownMenuShortcut({
   )
 }
 
+// DropdownMenuSub - submenu lồng nhau
 function DropdownMenuSub({
   ...props
 }) {
   return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />
 }
 
+// DropdownMenuSubTrigger - nút kích hoạt mở submenu
+// Có icon mũi tên chỉ sang phải
 function DropdownMenuSubTrigger({
   className,
   inset,
@@ -215,6 +239,7 @@ function DropdownMenuSubTrigger({
   )
 }
 
+// DropdownMenuSubContent - nội dung của submenu
 function DropdownMenuSubContent({
   className,
   ...props

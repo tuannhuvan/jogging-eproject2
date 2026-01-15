@@ -4,6 +4,20 @@ import { cva } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// Định nghĩa các biến thể styling cho Button
+// Variants:
+// - default: nền primary, chữ trắng
+// - destructive: nền đỏ cho hành động nguy hiểm (xóa, hủy)
+// - outline: có viền, nền trong suốt
+// - secondary: nền secondary
+// - ghost: không có nền, chỉ hiện khi hover
+// - link: hiển thị như link với underline khi hover
+// Size:
+// - default: chiều cao 36px (h-9)
+// - sm: chiều cao 32px (h-8)
+// - lg: chiều cao 40px (h-10)
+// - icon: hình vuông 36px cho nút chỉ có icon
+// - icon-sm/icon-lg: các kích thước icon khác
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
@@ -36,6 +50,11 @@ const buttonVariants = cva(
   }
 )
 
+// Button - component nút bấm đa năng
+// Props:
+// - variant: kiểu hiển thị
+// - size: kích thước
+// - asChild: nếu true, sử dụng element con làm gốc thay vì button
 function Button({
   className,
   variant,

@@ -1,26 +1,38 @@
 "use client"
 import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
+import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+// Sheet - panel trượt từ cạnh màn hình
+// Tương tự Drawer nhưng sử dụng Radix Dialog làm nền tảng
+// Thường dùng cho menu mobile, filters, detail panels
 function Sheet({ ...props }) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
+
+// SheetTrigger - element kích hoạt mở sheet
 function SheetTrigger({
   ...props
 }) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
 }
+
+// SheetClose - nút đóng sheet
 function SheetClose({
   ...props
 }) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
 }
+
+// SheetPortal - render sheet vào portal
 function SheetPortal({
   ...props
 }) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
+
+// SheetOverlay - lớp phủ mờ phía sau sheet
 function SheetOverlay({
   className,
   ...props
@@ -36,6 +48,11 @@ function SheetOverlay({
     />
   )
 }
+
+// SheetContent - nội dung chính của sheet
+// Props:
+// - side: hướng trượt vào (top/bottom/left/right)
+// Có animation slide và nút đóng ở góc trên phải
 function SheetContent({
   className,
   children,
@@ -43,17 +60,22 @@ function SheetContent({
   ...props
 }) {
   return (
+    <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+          // Styling cho hướng right (mặc định)
           side === "right" &&
             "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
+          // Styling cho hướng left
           side === "left" &&
             "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
+          // Styling cho hướng top
           side === "top" &&
             "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
+          // Styling cho hướng bottom
           side === "bottom" &&
             "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
           className
@@ -61,6 +83,7 @@ function SheetContent({
         {...props}
       >
         {children}
+        {/* Nút đóng ở góc trên phải */}
         <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>
@@ -69,6 +92,8 @@ function SheetContent({
     </SheetPortal>
   )
 }
+
+// SheetHeader - phần header chứa tiêu đề và mô tả
 function SheetHeader({ className, ...props }) {
   return (
     <div
@@ -78,6 +103,8 @@ function SheetHeader({ className, ...props }) {
     />
   )
 }
+
+// SheetFooter - phần footer chứa các nút hành động
 function SheetFooter({ className, ...props }) {
   return (
     <div
@@ -87,6 +114,8 @@ function SheetFooter({ className, ...props }) {
     />
   )
 }
+
+// SheetTitle - tiêu đề của sheet
 function SheetTitle({
   className,
   ...props
@@ -99,6 +128,8 @@ function SheetTitle({
     />
   )
 }
+
+// SheetDescription - mô tả chi tiết của sheet
 function SheetDescription({
   className,
   ...props
@@ -111,6 +142,7 @@ function SheetDescription({
     />
   )
 }
+
 export {
   Sheet,
   SheetTrigger,

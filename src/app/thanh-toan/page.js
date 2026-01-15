@@ -15,13 +15,17 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
-// Trang thanh toán
+// Trang Thanh toán đơn hàng (Checkout)
 export default function CheckoutPage() {
   const router = useRouter()
+  // Lấy thông tin từ giỏ hàng (sản phẩm, tổng tiền, hàm xóa giỏ hàng)
   const { items, totalAmount, clearCart } = useCart()
+  // Lấy thông tin người dùng từ AuthContext
   const { user, profile } = useAuth()
+  // Quản lý trạng thái đang xử lý và trạng thái thành công
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  // Dữ liệu biểu mẫu thông tin giao hàng
   const [formData, setFormData] = useState({
     fullName: profile?.full_name || '',
     phone: '',
@@ -29,23 +33,24 @@ export default function CheckoutPage() {
     note: ''
   })
 
-  // Chuyển hướng nếu người dùng chưa đăng nhập hoặc giỏ hàng trống
+  // Nếu chưa đăng nhập, chuyển hướng người dùng về trang đăng nhập
   if (!user) {
     router.push('/dang-nhap')
     return null
   }
 
-  // Chuyển hướng nếu giỏ hàng trống và chưa thành công
+  // Nếu giỏ hàng trống (và không phải vừa đặt hàng xong), chuyển hướng về trang giỏ hàng
   if (items.length === 0 && !success) {
     router.push('/cart')
     return null
   }
 
-  // Hàm xử lý gửi đơn hàng
+  // Xử lý khi người dùng nhấn nút "Xác nhận đặt hàng"
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
 
+    // Bước 1: Tạo bản ghi đơn hàng chính trong bảng 'orders'
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -53,19 +58,19 @@ export default function CheckoutPage() {
         total_amount: totalAmount,
         shipping_address: formData.address,
         phone: formData.phone,
-        status: 'pending'
+        status: 'pending' // Trạng thái ban đầu là chờ xác nhận
       })
       .select()
       .single()
 
-    // Xử lý lỗi khi không thể tạo đơn hàng
+    // Kiểm tra lỗi khi tạo đơn hàng
     if (orderError || !orderData) {
       toast.error('Không thể tạo đơn hàng')
       setLoading(false)
       return
     }
 
-    // Thêm các mục vào đơn hàng
+    // Bước 2: Chuẩn bị dữ liệu chi tiết các sản phẩm trong đơn hàng
     const orderItems = items.map(item => ({
       order_id: orderData.id,
       product_id: item.id,
@@ -73,23 +78,26 @@ export default function CheckoutPage() {
       price: item.price
     }))
 
+    // Bước 3: Lưu chi tiết sản phẩm vào bảng 'order_items'
     const { error: itemsError } = await supabase
       .from('order_items')
       .insert(orderItems)
 
+    // Kiểm tra lỗi khi lưu chi tiết sản phẩm
     if (itemsError) {
       toast.error('Không thể thêm sản phẩm vào đơn hàng')
       setLoading(false)
       return
     }
 
+    // Bước 4: Xóa giỏ hàng, hiển thị thông báo thành công và cập nhật UI
     clearCart()
     setSuccess(true)
     toast.success('Đặt hàng thành công!')
     setLoading(false)
   }
 
-  // Hiển thị trang thành công sau khi đặt hàng
+  // Giao diện hiển thị sau khi đặt hàng thành công
   if (success) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4">
@@ -112,12 +120,14 @@ export default function CheckoutPage() {
     )
   }
 
+  // Giao diện biểu mẫu thanh toán
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8">Thanh toán</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cột trái: Form nhập thông tin giao hàng */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -173,12 +183,14 @@ export default function CheckoutPage() {
             </Card>
           </div>
 
+          {/* Cột phải: Tóm tắt đơn hàng */}
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardHeader>
                 <CardTitle>Đơn hàng của bạn</CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Danh sách các sản phẩm đang đặt */}
                 <div className="space-y-4 mb-6">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-3">
@@ -201,6 +213,7 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
+                {/* Tính toán tổng tiền */}
                 <div className="space-y-3 border-t pt-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Tạm tính</span>

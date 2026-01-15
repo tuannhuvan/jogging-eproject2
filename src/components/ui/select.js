@@ -1,41 +1,44 @@
 "use client"
-
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 
+// Select - dropdown chọn một option từ danh sách: Danh sách thả xuống (dropdown) để người dùng 
+// chọn một giá trị từ danh sách có sẵn.
+// Sử dụng Radix UI SelectPrimitive làm nền tảng
 function Select({
   ...props
 }) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
 }
 
+// SelectGroup - nhóm các options trong select
 function SelectGroup({
   ...props
 }) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />
 }
 
+// SelectValue - hiển thị giá trị đã chọn
 function SelectValue({
   ...props
 }) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
+// SelectTrigger - nút kích hoạt mở dropdown
+// Hiển thị giá trị đã chọn và icon mũi tên
 function SelectTrigger({
   className,
-  size = "default",
   children,
   ...props
 }) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
-      data-size={size}
       className={cn(
-        "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex h-9 w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -48,11 +51,13 @@ function SelectTrigger({
   )
 }
 
+// SelectContent - dropdown content chứa các options
+// Props:
+// - position: vị trí dropdown (popper/item-aligned)
 function SelectContent({
   className,
   children,
   position = "popper",
-  align = "center",
   ...props
 }) {
   return (
@@ -60,15 +65,15 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md",
+          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-[min(24rem,var(--radix-select-content-available-height))] min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md",
           position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           className
         )}
         position={position}
-        align={align}
         {...props}
       >
+        {/* Nút cuộn lên khi có nhiều options */}
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport
           className={cn(
@@ -79,12 +84,14 @@ function SelectContent({
         >
           {children}
         </SelectPrimitive.Viewport>
+        {/* Nút cuộn xuống khi có nhiều options */}
         <SelectScrollDownButton />
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
   )
 }
 
+// SelectLabel - label cho nhóm options
 function SelectLabel({
   className,
   ...props
@@ -98,6 +105,8 @@ function SelectLabel({
   )
 }
 
+// SelectItem - mỗi option trong dropdown
+// Hiển thị dấu tick khi được chọn
 function SelectItem({
   className,
   children,
@@ -112,6 +121,7 @@ function SelectItem({
       )}
       {...props}
     >
+      {/* Icon dấu tick khi item được chọn */}
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
           <CheckIcon className="size-4" />
@@ -122,6 +132,7 @@ function SelectItem({
   )
 }
 
+// SelectSeparator - đường phân cách giữa các nhóm
 function SelectSeparator({
   className,
   ...props
@@ -135,6 +146,7 @@ function SelectSeparator({
   )
 }
 
+// SelectScrollUpButton - nút cuộn lên khi có nhiều options
 function SelectScrollUpButton({
   className,
   ...props
@@ -153,6 +165,7 @@ function SelectScrollUpButton({
   )
 }
 
+// SelectScrollDownButton - nút cuộn xuống khi có nhiều options
 function SelectScrollDownButton({
   className,
   ...props

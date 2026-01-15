@@ -1,6 +1,6 @@
 "use client"
 import * as React from "react"
-import { Command} from "cmdk"
+import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -10,6 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+
+// Command Dialog UI là một thành phần Giao diện Người dùng (UI) dạng hộp thoại (dialog box) dùng để nhận lệnh 
+// hoặc yêu cầu thông tin từ người dùng một cách trực quan, thường xuất hiện để hỏi xác nhận, 
+// hiển thị thông báo quan trọng, hoặc yêu cầu nhập liệu trong một luồng công việc cụ thể, chặn 
+// hoặc không chặn tương tác với phần còn lại của ứng dụng, giúp hệ thống "nói chuyện" dễ hiểu hơn với người dùng.
+// Mục đích và chức năng
+// Nhận lệnh: Hỏi người dùng có muốn thực hiện hành động (Xóa, Lưu, Thoát).
+// Hiển thị thông tin: Cảnh báo lỗi, thông báo thành công (Ví dụ: "Lỗi: Không đủ quyền truy cập").
+// Yêu cầu nhập liệu: Thu thập thông tin (Ví dụ: Cài đặt, Tìm kiếm).
+// Dẫn dắt người dùng: Hướng dẫn qua quy trình nhiều bước.  
+// Command - component command palette/search box
+// Sử dụng thư viện cmdk làm nền tảng
 function Command({
   className,
   ...props
@@ -25,6 +37,12 @@ function Command({
     />
   )
 }
+
+// CommandDialog - command palette dạng dialog modal
+// Props:
+// - title: tiêu đề dialog (cho accessibility)
+// - description: mô tả dialog
+// - showCloseButton: hiển thị nút đóng
 function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
@@ -36,8 +54,8 @@ function CommandDialog({
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
-        {title}</DialogTitle>
-        {description}</DialogDescription>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <DialogContent
         className={cn("overflow-hidden p-0", className)}
@@ -50,6 +68,8 @@ function CommandDialog({
     </Dialog>
   )
 }
+
+// CommandInput - ô input tìm kiếm với icon search
 function CommandInput({
   className,
   ...props
@@ -71,6 +91,8 @@ function CommandInput({
     </div>
   )
 }
+
+// CommandList - danh sách kết quả tìm kiếm có scroll
 function CommandList({
   className,
   ...props
@@ -86,6 +108,8 @@ function CommandList({
     />
   )
 }
+
+// CommandEmpty - hiển thị khi không có kết quả tìm kiếm
 function CommandEmpty({
   ...props
 }) {
@@ -97,6 +121,8 @@ function CommandEmpty({
     />
   )
 }
+
+// CommandGroup - nhóm các command items với heading
 function CommandGroup({
   className,
   ...props
@@ -112,6 +138,8 @@ function CommandGroup({
     />
   )
 }
+
+// CommandSeparator - đường phân cách giữa các nhóm
 function CommandSeparator({
   className,
   ...props
@@ -124,6 +152,9 @@ function CommandSeparator({
     />
   )
 }
+
+// CommandItem - mỗi item trong command list
+// Có highlight khi selected và disabled state
 function CommandItem({
   className,
   ...props
@@ -139,6 +170,8 @@ function CommandItem({
     />
   )
 }
+
+// CommandShortcut - hiển thị phím tắt bên phải command item
 function CommandShortcut({
   className,
   ...props
@@ -154,6 +187,7 @@ function CommandShortcut({
     />
   )
 }
+
 export {
   Command,
   CommandDialog,

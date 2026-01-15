@@ -9,20 +9,31 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 
-// Trang sự kiện và giải chạy
+// Dữ liệu mẫu cho hình ảnh nếu không có trong database
+const fallbackImages = {
+  event: [
+    'https://images.unsplash.com/photo-1533560904424-a0c61dc306fc?w=800',
+    'https://images.unsplash.com/photo-1486739985386-d4fae04ca6f7?w=800',
+    'https://images.unsplash.com/photo-1530541930197-ff16ac7a7b2e?w=800',
+    'https://images.unsplash.com/photo-1502126324834-38f8e02d7160?w=800'
+  ]
+}
+
+// Trang hiển thị danh sách các sự kiện và giải chạy
 export default function EventsPage() {
+  // Quản lý trạng thái danh sách sự kiện, trạng thái tải và từ khóa tìm kiếm
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Tải dữ liệu sự kiện khi component được gắn kết
+  // Tải dữ liệu sự kiện từ API khi component được gắn kết (mount)
   useEffect(() => {
     async function fetchEvents() {
       try {
         const data = await api.getEvents()
         setEvents(data || [])
       } catch (error) {
-        console.error('Error fetching events:', error)
+        console.error('Lỗi khi tải danh sách sự kiện:', error)
       } finally {
         setLoading(false)
       }
@@ -30,16 +41,16 @@ export default function EventsPage() {
     fetchEvents()
   }, [])
 
-  // Lọc sự kiện dựa trên từ khóa tìm kiếm
+  // Lọc danh sách sự kiện dựa trên tên sự kiện hoặc địa điểm mà người dùng nhập vào ô tìm kiếm
   const filteredEvents = events.filter(event => 
     event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.location.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Hiển thị nội dung trang sự kiện
+  // Giao diện chính của trang sự kiện
   return (
     <div className="min-h-screen bg-muted/30 pb-20">
-      {/* Hero Section */}
+      {/* Phần giới thiệu (Hero Section) */}
       <div className="bg-primary py-20 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -51,7 +62,7 @@ export default function EventsPage() {
       </div>
 
       <div className="container mx-auto px-4 -mt-10 relative z-20">
-        {/* Filter Bar */}
+        {/* Thanh công cụ tìm kiếm và lọc */}
         <Card className="mb-12 shadow-xl border-none">
           <CardContent className="p-4 md:p-6">
             <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -71,6 +82,7 @@ export default function EventsPage() {
           </CardContent>
         </Card>
 
+        {/* Danh sách sự kiện - Hiển thị skeleton khi đang tải */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -78,17 +90,20 @@ export default function EventsPage() {
             ))}
           </div>
         ) : (
+          /* Hiển thị danh sách sự kiện sau khi đã tải xong */
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {filteredEvents.length > 0 ? (
               filteredEvents.map((event) => (
                 <Card key={event.id} className="overflow-hidden group hover:shadow-2xl transition-all duration-500 border-none shadow-lg bg-white flex flex-col h-full">
+                  {/* Hình ảnh sự kiện */}
                   <div className="relative h-52 overflow-hidden">
-                    <Image
-                      src={event.image_url || 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=800'}
-                      alt={event.name}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
+                      <Image
+                        src={event.image_url || 'https://images.unsplash.com/photo-1502126324834-38f8e02d7160?w=800'}
+                        alt={event.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    {/* Badge trạng thái đăng ký */}
                     <div className="absolute top-4 left-4">
                       <span className={`px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-xl ${
                         event.status === 'Open' ? 'bg-green-500' : 'bg-orange-500'
@@ -97,11 +112,13 @@ export default function EventsPage() {
                       </span>
                     </div>
                   </div>
+                  {/* Nội dung chi tiết sự kiện */}
                   <CardContent className="p-6 flex flex-col flex-1">
                     <h3 className="text-xl font-bold mb-4 group-hover:text-primary transition-colors line-clamp-2 min-h-[56px]">
                       {event.name}
                     </h3>
                     
+                    {/* Các thông tin cơ bản: Ngày, Địa điểm, Cự ly */}
                     <div className="space-y-3 mb-8 flex-1">
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -130,6 +147,7 @@ export default function EventsPage() {
                       </div>
                     </div>
 
+                    {/* Nút đăng ký hoặc xem chi tiết */}
                     <Link href={`/events/${event.id}`} className="mt-auto">
                       <Button className="w-full h-12 font-bold text-lg group-hover:shadow-lg transition-all">
                         {event.status === 'Open' ? 'Đăng ký tham gia' : 'Xem chi tiết'}
@@ -140,6 +158,7 @@ export default function EventsPage() {
                 </Card>
               ))
             ) : (
+              /* Hiển thị khi không có kết quả tìm kiếm */
               <div className="col-span-full py-20 text-center">
                 <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="w-10 h-10 text-muted-foreground" />
@@ -152,7 +171,7 @@ export default function EventsPage() {
         )}
       </div>
 
-      {/* Featured Section */}
+      {/* Phần kêu gọi hành động cho nhà tổ chức (CTA) */}
       <div className="container mx-auto px-4 mt-20">
         <div className="bg-gradient-to-r from-accent to-accent/80 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center gap-8 shadow-2xl">
           <div className="flex-1 text-center md:text-left">
@@ -165,15 +184,16 @@ export default function EventsPage() {
             </Button>
           </div>
           <div className="w-full md:w-1/3 aspect-video relative rounded-2xl overflow-hidden shadow-xl">
-             <Image 
-               src="https://images.unsplash.com/photo-1596727147705-61a532a655bd?w=800"
-               alt="Organizer"
-               fill
-               className="object-cover"
-             />
+               <Image 
+                 src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800"
+                 alt="Organizer"
+                 fill
+                 className="object-cover"
+               />
           </div>
         </div>
       </div>
     </div>
   )
 }
+

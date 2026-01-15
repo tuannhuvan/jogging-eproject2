@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * HEADER COMPONENT - Thanh điều hướng chính của ứng dụng
+ * 
+ * Hiển thị logo, menu điều hướng, giỏ hàng và thông tin người dùng
+ * Hỗ trợ responsive cho cả desktop và mobile
+ */
+
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Menu, X, ShoppingCart, User, ChevronDown } from 'lucide-react'
@@ -14,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+// Danh sách các liên kết điều hướng chính
+// Được định nghĩa ngoài component để tránh tạo lại mảng mỗi lần render
 const navLinks = [
   { href: '/', label: 'Trang chủ' },
   { href: '/events', label: 'Sự kiện' },
@@ -23,40 +32,60 @@ const navLinks = [
   { href: '/clubs', label: 'Cộng đồng' },
 ]
 
+/**
+ * Component Header chính
+ * Bao gồm: logo, menu điều hướng, giỏ hàng, tài khoản người dùng
+ * và bộ đếm lượt truy cập
+ */
 export function Header() {
+  // State quản lý trạng thái mở/đóng menu mobile
   const [isOpen, setIsOpen] = useState(false)
+  // State lưu số lượt truy cập website
   const [visitorCount, setVisitorCount] = useState(0)
+  // State theo dõi khi người dùng cuộn trang
   const [scrolled, setScrolled] = useState(false)
+  // State kiểm tra component đã mounted chưa để tránh lỗi hydration
+  const [mounted, setMounted] = useState(false)
+  // Lấy thông tin user và profile từ AuthContext
   const { user, profile, signOut } = useAuth()
+  // Lấy tổng số sản phẩm trong giỏ hàng từ CartContext
   const { totalItems } = useCart()
 
-    useEffect(() => {
+  // Effect lấy số lượt truy cập khi component mount
+  useEffect(() => {
+    setMounted(true)
     async function fetchVisitorCount() {
       try {
         const count = await api.getVisitors()
-        setVisitorCount(count || 0)
+        if (typeof count === 'number') {
+          setVisitorCount(count)
+        }
       } catch (error) {
-        console.error('Error fetching visitor count:', error)
+        console.error('Error in fetchVisitorCount:', error)
       }
     }
     fetchVisitorCount()
   }, [])
 
+  // Effect theo dõi sự kiện cuộn để thay đổi style header
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
+    // Cleanup: hủy event listener khi component unmount
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-md' : 'bg-white'}`}>
+      {/* Hiển thị số lượt truy cập ở góc phải */}
       <div className="absolute top-2 right-4 text-xs text-muted-foreground flex items-center gap-1">
         <User className="w-3 h-3" />
-        <span>{visitorCount.toLocaleString()} lượt truy cập</span>
+        <span>{mounted ? visitorCount.toLocaleString() : '0'} lượt truy cập</span>
       </div>
       
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full 
             flex items-center justify-center">
@@ -68,6 +97,7 @@ export function Header() {
             </span>
           </Link>
 
+          {/* Menu điều hướng cho desktop */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -80,7 +110,9 @@ export function Header() {
             ))}
           </nav>
 
+          {/* Phần bên phải: giỏ hàng và tài khoản (desktop) */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Icon giỏ hàng với badge số lượng */}
             <Link href="/cart" className="relative p-2 hover:bg-muted rounded-full transition-colors">
               <ShoppingCart className="w-5 h-5" />
               {totalItems > 0 && (
@@ -90,6 +122,7 @@ export function Header() {
               )}
             </Link>
 
+            {/* Menu dropdown tài khoản hoặc nút đăng nhập */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -100,11 +133,13 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {/* Hiển thị link Quản trị nếu user là admin */}
                   {profile?.role === 'admin' && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin">Quản trị</Link>
                     </DropdownMenuItem>
                   )}
+                  {/* Hiển thị link Nhà cung cấp nếu user là supplier */}
                   {profile?.role === 'supplier' && (
                     <DropdownMenuItem asChild>
                       <Link href="/supplier">Nhà cung cấp</Link>
@@ -127,6 +162,7 @@ export function Header() {
             )}
           </div>
 
+          {/* Nút hamburger menu cho mobile */}
           <button
             className="md:hidden p-2"
             onClick={() => setIsOpen(!isOpen)}
@@ -135,9 +171,11 @@ export function Header() {
           </button>
         </div>
 
+        {/* Menu mobile - hiển thị khi isOpen = true */}
         {isOpen && (
           <div className="md:hidden py-4 border-t animate-fade-in">
             <nav className="flex flex-col gap-2">
+              {/* Các link điều hướng */}
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -148,12 +186,14 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
+              {/* Link giỏ hàng */}
               <div className="flex items-center gap-3 px-4 pt-4 border-t mt-2">
                 <Link href="/cart" className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
                   <span>Giỏ hàng ({totalItems})</span>
                 </Link>
               </div>
+              {/* Menu tài khoản cho mobile */}
               {user ? (
                 <div className="px-4 pt-2">
                   {profile?.role === 'admin' && (

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
-// Cấu hình trạng thái đơn hàng
+// Cấu hình hiển thị trạng thái đơn hàng
 const statusConfig = {
   pending: { label: 'Chờ xác nhận', color: 'bg-yellow-500', icon: Clock },
   confirmed: { label: 'Đã xác nhận', color: 'bg-blue-500', icon: CheckCircle },
@@ -18,21 +18,22 @@ const statusConfig = {
   cancelled: { label: 'Đã hủy', color: 'bg-red-500', icon: XCircle }
 }
 
-// Trang đơn hàng của người dùng
+// Trang hiển thị danh sách đơn hàng của người dùng
 export default function OrdersPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Tải dữ liệu đơn hàng khi component được gắn kết
+  // Kiểm tra đăng nhập và lấy danh sách đơn hàng
   useEffect(() => {
+    // Nếu chưa đăng nhập, chuyển hướng về trang đăng nhập
     if (!authLoading && !user) {
       router.push('/dang-nhap')
       return
     }
 
-    // Nếu đã đăng nhập, tải đơn hàng của người dùng
+    // Nếu đã đăng nhập, thực hiện lấy dữ liệu đơn hàng từ Supabase
     if (user) {
       async function fetchOrders() {
         const { data } = await supabase
@@ -48,7 +49,7 @@ export default function OrdersPage() {
     }
   }, [user, authLoading, router])
 
-  // Hiển thị trạng thái tải dữ liệu
+  // Hiển thị trạng thái đang tải dữ liệu
   if (authLoading || loading) {
     return (
       <div className="min-h-screen py-8">
@@ -64,12 +65,13 @@ export default function OrdersPage() {
     )
   }
 
-  // Hiển thị nội dung trang đơn hàng
+  // Giao diện danh sách đơn hàng
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8">Đơn hàng của tôi</h1>
 
+        {/* Kiểm tra nếu không có đơn hàng */}
         {orders.length === 0 ? (
           <div className="text-center py-16">
             <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -82,6 +84,7 @@ export default function OrdersPage() {
             </Link>
           </div>
         ) : (
+          /* Danh sách các đơn hàng */
           <div className="space-y-4">
             {orders.map((order) => {
               const status = statusConfig[order.status] || statusConfig.pending
@@ -100,6 +103,7 @@ export default function OrdersPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      {/* Cột thông tin ngày đặt */}
                       <div>
                         <p className="text-muted-foreground">Ngày đặt</p>
                         <p className="font-medium">
@@ -112,12 +116,14 @@ export default function OrdersPage() {
                           })}
                         </p>
                       </div>
+                      {/* Cột thông tin tổng tiền */}
                       <div>
                         <p className="text-muted-foreground">Tổng tiền</p>
                         <p className="font-bold text-primary">
                           {order.total_amount.toLocaleString('vi-VN')}đ
                         </p>
                       </div>
+                      {/* Cột thông tin địa chỉ giao hàng */}
                       <div>
                         <p className="text-muted-foreground">Địa chỉ</p>
                         <p className="font-medium line-clamp-2">{order.shipping_address}</p>
@@ -133,3 +139,4 @@ export default function OrdersPage() {
     </div>
   )
 }
+

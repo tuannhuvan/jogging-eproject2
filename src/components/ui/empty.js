@@ -1,5 +1,8 @@
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+
+// Empty - container hiển thị trạng thái rỗng/trống chưa có dữ liệu
+// Thường dùng khi không có dữ liệu để hiển thị
 function Empty({ className, ...props }) {
   return (
     <div
@@ -12,6 +15,8 @@ function Empty({ className, ...props }) {
     />
   )
 }
+
+// EmptyHeader - phần header chứa icon, tiêu đề và mô tả
 function EmptyHeader({ className, ...props }) {
   return (
     <div
@@ -24,6 +29,10 @@ function EmptyHeader({ className, ...props }) {
     />
   )
 }
+
+// Định nghĩa variants cho EmptyMedia
+// - default: không có nền
+// - icon: có nền muted với icon ở giữa
 const emptyMediaVariants = cva(
   "flex shrink-0 items-center justify-center mb-2 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
@@ -38,11 +47,13 @@ const emptyMediaVariants = cva(
     },
   }
 )
+
+// EmptyMedia - hiển thị icon hoặc hình ảnh minh họa
 function EmptyMedia({
   className,
   variant = "default",
   ...props
-} & VariantProps<typeof emptyMediaVariants>) {
+}) {
   return (
     <div
       data-slot="empty-icon"
@@ -52,6 +63,8 @@ function EmptyMedia({
     />
   )
 }
+
+// EmptyTitle - tiêu đề trạng thái rỗng
 function EmptyTitle({ className, ...props }) {
   return (
     <div
@@ -61,6 +74,8 @@ function EmptyTitle({ className, ...props }) {
     />
   )
 }
+
+// EmptyDescription - mô tả chi tiết trạng thái rỗng
 function EmptyDescription({ className, ...props }) {
   return (
     <div
@@ -73,6 +88,8 @@ function EmptyDescription({ className, ...props }) {
     />
   )
 }
+
+// EmptyContent - nội dung bổ sung (thường là nút hành động)
 function EmptyContent({ className, ...props }) {
   return (
     <div
@@ -85,6 +102,7 @@ function EmptyContent({ className, ...props }) {
     />
   )
 }
+
 export {
   Empty,
   EmptyHeader,

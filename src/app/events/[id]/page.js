@@ -134,32 +134,45 @@ export default function EventDetailPage() {
         distance: formData.distance
       })
 
-      if (result && !result.error) {
-        const checkoutResponse = await fetch('/api/checkout/event', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            registrationId: result.id,
-            eventId: event.id,
-            eventName: event.name,
-            distance: formData.distance,
-            email: formData.email,
-          }),
-        })
+        if (result && !result.error) {
+          const checkoutResponse = await fetch('/api/checkout/event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              registrationId: result.id,
+              eventId: event.id,
+              eventName: event.name,
+              distance: formData.distance,
+              email: formData.email,
+            }),
+          })
 
-        const checkoutData = await checkoutResponse.json()
+          if (!checkoutResponse.ok) {
+            const errorText = await checkoutResponse.text()
+            console.error('Checkout error:', errorText)
+            throw new Error('Không thể tạo phiên thanh toán')
+          }
 
-        if (checkoutData.url) {
-          window.location.href = checkoutData.url
+            let checkoutData = {}
+            try {
+              checkoutData = await checkoutResponse.json()
+            } catch (e) {
+              console.error('Failed to parse checkout JSON:', e)
+              throw new Error('Phản hồi từ máy chủ không hợp lệ')
+            }
+
+            if (checkoutData.url) {
+            window.location.href = checkoutData.url
+          } else {
+            toast.error('Không thể tạo phiên thanh toán')
+            setRegistering(false)
+          }
         } else {
-          toast.error('Không thể tạo phiên thanh toán')
+          toast.error(result?.error || 'Đăng ký thất bại, vui lòng thử lại sau')
           setRegistering(false)
         }
-      } else {
-        toast.error(result?.error || 'Đăng ký thất bại, vui lòng thử lại sau')
-        setRegistering(false)
-      }
     } catch (error) {
+      console.error('Registration error:', error)
       toast.error('Đã xảy ra lỗi trong quá trình đăng ký')
       setRegistering(false)
     }
@@ -183,7 +196,19 @@ export default function EventDetailPage() {
         }),
       })
 
-      const checkoutData = await checkoutResponse.json()
+      if (!checkoutResponse.ok) {
+        const errorText = await checkoutResponse.text()
+        console.error('Payment error:', errorText)
+        throw new Error('Không thể tạo phiên thanh toán')
+      }
+
+      let checkoutData = {}
+      try {
+        checkoutData = await checkoutResponse.json()
+      } catch (e) {
+        console.error('Failed to parse checkout JSON:', e)
+        throw new Error('Phản hồi từ máy chủ không hợp lệ')
+      }
 
       if (checkoutData.url) {
         window.location.href = checkoutData.url
@@ -191,6 +216,7 @@ export default function EventDetailPage() {
         toast.error('Không thể tạo phiên thanh toán')
       }
     } catch (error) {
+      console.error('Payment error:', error)
       toast.error('Đã xảy ra lỗi')
     }
     setRegistering(false)
@@ -232,7 +258,7 @@ export default function EventDetailPage() {
       {/* Hero Header */}
       <div className="relative h-[300px] md:h-[450px] w-full">
         <Image
-          src={event.image_url || 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=1600'}
+          src={event.image_url || 'https://images.unsplash.com/photo-1502126324834-38f8e02d7160?w=1600'}
           alt={event.name}
           fill
           className="object-cover"

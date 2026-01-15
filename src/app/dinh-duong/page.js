@@ -7,30 +7,42 @@ import { api } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Play } from 'lucide-react'
 
+// Dữ liệu mẫu cho hình ảnh nếu không có trong database
+const fallbackImages = {
+  nutrition: [
+    'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800',
+    'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800',
+    'https://images.unsplash.com/photo-1547592180-85f173990554?w=800',
+    'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800'
+  ]
+}
+
 // Trang dinh dưỡng cho runner
 export default function DinhDuongPage() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
   // Tải dữ liệu bài viết về dinh dưỡng khi component được gắn kết
+  // Lấy tất cả bài viết từ API và lọc theo danh mục dinh dưỡng (category_id 3 hoặc 4)
   useEffect(() => {
     async function fetchData() {
       try {
         const data = await api.getPosts()
         if (data) {
-          // Filter for nutrition-related categories (assuming 3 and 4 based on previous code)
+          // Lọc các bài viết thuộc danh mục dinh dưỡng
           setPosts(data.filter(p => p.category_id === 3 || p.category_id === 4))
         }
         setLoading(false)
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Lỗi khi tải dữ liệu:', error)
         setLoading(false)
       }
     }
     fetchData()
   }, [])
 
-  // Dữ liệu video hướng dẫn (cố định cho ví dụ)
+  // Dữ liệu video hướng dẫn (cố định để minh họa)
+  // Trong thực tế, dữ liệu này có thể được lấy từ CMS hoặc Database
   const videos = [
     {
       id: 1,

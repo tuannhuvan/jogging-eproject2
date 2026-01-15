@@ -5,6 +5,10 @@ import * as LabelPrimitive from "@radix-ui/react-label"
 
 import { cn } from "@/lib/utils"
 
+// Label - nhãn cho form controls
+// Sử dụng Radix UI LabelPrimitive làm nền tảng
+// Tự động kết nối với input thông qua htmlFor hoặc bọc bên ngoài
+// Hỗ trợ disabled state thông qua group-data-[disabled] và peer-disabled
 function Label({
   className,
   ...props
