@@ -66,10 +66,13 @@ export default function AdminProductsPage() {
     price: '',          // Giá bán
     original_price: '', // Giá gốc (nếu có giảm giá)
     stock_quantity: '', // Số lượng trong kho
-    image_url: '',      // URL hình ảnh
+    image_url: '',      // URL hình ảnh chính
+    images: [],         // Danh sách URL hình ảnh phụ
     category_id: '',    // ID danh mục
     is_featured: false  // Có phải sản phẩm nổi bật không
   })
+  const [newImageUrl, setNewImageUrl] = useState('') // URL ảnh mới đang nhập
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   // Effect: Kiểm tra quyền admin và tải dữ liệu
   useEffect(() => {
@@ -127,10 +130,12 @@ export default function AdminProductsPage() {
       original_price: '',
       stock_quantity: '',
       image_url: '',
+      images: [],
       category_id: '',
       is_featured: false
     })
     setEditingProduct(null)
+    setNewImageUrl('')
   }
 
   /**
@@ -139,7 +144,6 @@ export default function AdminProductsPage() {
    */
   function openEditDialog(product) {
     setEditingProduct(product)
-    // Điền dữ liệu sản phẩm vào form
     setFormData({
       name: product.name,
       slug: product.slug,
@@ -148,10 +152,62 @@ export default function AdminProductsPage() {
       original_price: product.original_price?.toLocaleString('vi-VN') || '',
       stock_quantity: product.stock_quantity.toString(),
       image_url: product.image_url || '',
+      images: product.images || [],
       category_id: product.category_id?.toString() || '',
       is_featured: product.is_featured
     })
+    setNewImageUrl('')
     setIsDialogOpen(true)
+  }
+
+  function addImage() {
+    if (newImageUrl.trim() && !formData.images.includes(newImageUrl.trim())) {
+      setFormData({ ...formData, images: [...formData.images, newImageUrl.trim()] })
+      setNewImageUrl('')
+    }
+  }
+
+  function removeImage(index) {
+    setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })
+  }
+
+  async function handleImageUpload(e) {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploadingImage(true)
+    const uploadedUrls = []
+
+    for (const file of files) {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `products/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(filePath, file)
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('images')
+          .getPublicUrl(filePath)
+        uploadedUrls.push(publicUrl)
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      if (!formData.image_url) {
+        setFormData({ 
+          ...formData, 
+          image_url: uploadedUrls[0],
+          images: [...formData.images, ...uploadedUrls.slice(1)]
+        })
+      } else {
+        setFormData({ ...formData, images: [...formData.images, ...uploadedUrls] })
+      }
+      toast.success(`Đã tải lên ${uploadedUrls.length} ảnh`)
+    }
+    setUploadingImage(false)
   }
 
   /**
@@ -170,6 +226,7 @@ export default function AdminProductsPage() {
       original_price: formData.original_price ? parseFloat(formData.original_price.replace(/[.,]/g, '')) : null,
       stock_quantity: parseInt(formData.stock_quantity),
       image_url: formData.image_url,
+      images: formData.images,
       category_id: formData.category_id ? parseInt(formData.category_id) : null,
       is_featured: formData.is_featured
     }
@@ -357,7 +414,7 @@ export default function AdminProductsPage() {
                     />
                   </div>
                 </div>
-                {/* Hàng 4: Danh mục và URL hình ảnh */}
+                {/* Hàng 4: Danh mục và URL hình ảnh chính */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Danh mục</Label>
@@ -378,13 +435,84 @@ export default function AdminProductsPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>URL hình ảnh</Label>
+                    <Label>URL hình ảnh chính</Label>
                     <Input
                       value={formData.image_url}
                       onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
                     />
                   </div>
                 </div>
+                {/* Upload nhiều ảnh */}
+                <div className="space-y-2">
+                  <Label>Tải ảnh lên (chọn nhiều ảnh)</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                  />
+                  {uploadingImage && <p className="text-sm text-muted-foreground">Đang tải lên...</p>}
+                </div>
+                {/* Thêm URL ảnh phụ */}
+                <div className="space-y-2">
+                  <Label>Thêm URL ảnh phụ</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newImageUrl}
+                      onChange={(e) => setNewImageUrl(e.target.value)}
+                      placeholder="Nhập URL ảnh"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
+                    />
+                    <Button type="button" variant="outline" onClick={addImage}>Thêm</Button>
+                  </div>
+                </div>
+                {/* Hiển thị danh sách ảnh đã thêm */}
+                {(formData.image_url || formData.images.length > 0) && (
+                  <div className="space-y-2">
+                    <Label>Ảnh đã chọn ({1 + formData.images.length} ảnh)</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.image_url && (
+                        <div className="relative group">
+                          <img
+                            src={formData.image_url}
+                            alt="Ảnh chính"
+                            className="w-20 h-20 object-cover rounded border-2 border-primary"
+                          />
+                          <span className="absolute bottom-0 left-0 right-0 bg-primary text-white text-xs text-center">Chính</span>
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, image_url: formData.images[0] || '', images: formData.images.slice(1) })}
+                            className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition"
+                          >×</button>
+                        </div>
+                      )}
+                      {formData.images.map((img, idx) => (
+                        <div key={idx} className="relative group">
+                          <img
+                            src={img}
+                            alt={`Ảnh ${idx + 1}`}
+                            className="w-20 h-20 object-cover rounded border cursor-pointer hover:border-primary"
+                            onClick={() => {
+                              const newImages = [...formData.images]
+                              newImages.splice(idx, 1)
+                              if (formData.image_url) newImages.unshift(formData.image_url)
+                              setFormData({ ...formData, image_url: img, images: newImages })
+                            }}
+                            title="Click để đặt làm ảnh chính"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(idx)}
+                            className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition"
+                          >×</button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Click vào ảnh phụ để đặt làm ảnh chính</p>
+                  </div>
+                )}
                 {/* Checkbox sản phẩm nổi bật */}
                 <div className="flex items-center gap-2">
                   <input
