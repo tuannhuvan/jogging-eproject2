@@ -43,6 +43,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/lib/auth-context'
+// Component hiển thị thông báo (đơn hàng mới, đăng ký sự kiện, đánh giá...)
+import AdminNotifications from '@/components/AdminNotifications'
 
 /**
  * Cấu hình menu sidebar
@@ -200,16 +202,14 @@ export default function AdminLayout({ children }) {
             </div>
           </div>
 
-          {/* Phần bên phải: Thông báo và thông tin admin */}
-          <div className="flex items-center gap-4">
-            {/* Nút thông báo */}
-            <button className="text-slate-400 hover:text-white transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
-            {/* Nút trợ giúp */}
-            <button className="text-slate-400 hover:text-white transition-colors">
-              <HelpCircle className="w-5 h-5" />
-            </button>
+            {/* Phần bên phải: Thông báo và thông tin admin */}
+            <div className="flex items-center gap-4">
+              {/* Component thông báo - hiển thị đơn hàng mới, đăng ký sự kiện, đánh giá */}
+              <AdminNotifications />
+              {/* Nút trợ giúp */}
+              <button className="text-slate-400 hover:text-white transition-colors">
+                <HelpCircle className="w-5 h-5" />
+              </button>
             {/* Thông tin admin */}
             <div className="flex items-center gap-2 pl-4 border-l border-slate-700">
               <span className="text-sm text-slate-300">Chào, Administrator</span>

@@ -471,7 +471,7 @@ export default function ProductDetailPage() {
                         vui lòng liên hệ với chúng tôi theo hotline bên dưới để được tư vấn tốt nhất.
                       </p>
                       <p className="text-2xl font-bold text-red-500 mb-4">
-                        {'>>>'} 0785.519.888 {'<<<'}
+                        {'>>>'} 0976.493.683 {'<<<'}
                       </p>
                     </div>
 

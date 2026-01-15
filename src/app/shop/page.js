@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Star, Filter, ShoppingCart } from 'lucide-react'
+import { Star, Filter, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/lib/cart-context'
@@ -17,6 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
+// Số sản phẩm hiển thị mỗi trang
+const PRODUCTS_PER_PAGE = 12
 
 // Dữ liệu mẫu cho hình ảnh nếu không có trong database
 const fallbackImages = {
@@ -54,14 +57,18 @@ function cleanImageUrl(url) {
 // Nội dung chính của trang cửa hàng
 function ShopContent() {
   const searchParams = useSearchParams()
-  // Lấy danh mục từ URL (nếu có)
+  const router = useRouter()
+  // Lấy danh mục và trang hiện tại từ URL (nếu có)
   const categoryParam = searchParams.get('category')
+  const pageParam = parseInt(searchParams.get('page')) || 1
   // Quản lý trạng thái sản phẩm, danh mục, danh mục đang chọn, sắp xếp và trạng thái tải
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(categoryParam || 'all')
   const [sortBy, setSortBy] = useState('newest')
   const [loading, setLoading] = useState(true)
+  // Trang hiện tại (bắt đầu từ 1)
+  const [currentPage, setCurrentPage] = useState(pageParam)
   const { addItem } = useCart()
 
   // Tải dữ liệu sản phẩm và danh mục sản phẩm từ API khi component được gắn kết (mount)
@@ -102,6 +109,29 @@ function ShopContent() {
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       }
     })
+
+  // Tính toán phân trang
+  const totalProducts = filteredProducts.length
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE)
+  // Lấy sản phẩm cho trang hiện tại
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE)
+
+  // Reset về trang 1 khi thay đổi danh mục hoặc sắp xếp
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedCategory, sortBy])
+
+  // Hàm chuyển trang
+  function goToPage(page) {
+    setCurrentPage(page)
+    // Cập nhật URL với tham số page
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', page.toString())
+    router.push(`/shop?${params.toString()}`, { scroll: false })
+    // Cuộn lên đầu danh sách sản phẩm
+    window.scrollTo({ top: 300, behavior: 'smooth' })
+  }
 
   // Hàm xử lý thêm sản phẩm vào giỏ hàng và hiển thị thông báo
   function handleAddToCart(product) {
@@ -186,10 +216,21 @@ function ShopContent() {
           <div className="text-center py-12">
             <p className="text-muted-foreground">Không tìm thấy sản phẩm nào phù hợp với yêu cầu.</p>
           </div>
-        ) : (
-          /* Lưới hiển thị danh sách sản phẩm */
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.map((product, index) => (
+          ) : (
+            /* Lưới hiển thị danh sách sản phẩm */
+            <>
+              {/* Thông tin phân trang */}
+              <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
+                <span>
+                  Hiển thị {startIndex + 1} - {Math.min(startIndex + PRODUCTS_PER_PAGE, totalProducts)} / {totalProducts} sản phẩm
+                </span>
+                {totalPages > 1 && (
+                  <span>Trang {currentPage} / {totalPages}</span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {paginatedProducts.map((product, index) => (
               <Card key={product.id} className="overflow-hidden group animate-fade-in flex flex-col h-full" style={{ animationDelay: `${index * 50}ms` }}>
                   <Link href={`/shop/${product.slug}`}>
                       {/* Hình ảnh sản phẩm kèm nhãn giảm giá */}
@@ -258,15 +299,95 @@ function ShopContent() {
                       <ShoppingCart className="w-4 h-4" />
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+              {/* Phân trang */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                  {/* Nút trang trước */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="h-10 w-10"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+
+                  {/* Các nút số trang */}
+                  <div className="flex items-center gap-1">
+                    {/* Trang đầu tiên */}
+                    {currentPage > 3 && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => goToPage(1)}
+                          className="h-10 w-10"
+                        >
+                          1
+                        </Button>
+                        {currentPage > 4 && (
+                          <span className="px-2 text-muted-foreground">...</span>
+                        )}
+                      </>
+                    )}
+
+                    {/* Các trang xung quanh trang hiện tại */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(page => page >= currentPage - 2 && page <= currentPage + 2)
+                      .map(page => (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => goToPage(page)}
+                          className="h-10 w-10"
+                        >
+                          {page}
+                        </Button>
+                      ))}
+
+                    {/* Trang cuối cùng */}
+                    {currentPage < totalPages - 2 && (
+                      <>
+                        {currentPage < totalPages - 3 && (
+                          <span className="px-2 text-muted-foreground">...</span>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => goToPage(totalPages)}
+                          className="h-10 w-10"
+                        >
+                          {totalPages}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Nút trang sau */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="h-10 w-10"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
 
 // Trang cửa hàng với Suspense để tải nội dung chính
