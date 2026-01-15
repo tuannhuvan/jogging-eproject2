@@ -145,12 +145,15 @@ export function Header() {
                       <Link href="/supplier">Nhà cung cấp</Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem asChild>
-                    <Link href="/don-hang">Đơn hàng của tôi</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={signOut} className="text-destructive">
-                    Đăng xuất
-                  </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                      <Link href="/profile">Hồ sơ cá nhân</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/don-hang">Đơn hàng của tôi</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={signOut} className="text-destructive">
+                      Đăng xuất
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -195,16 +198,17 @@ export function Header() {
               </div>
               {/* Menu tài khoản cho mobile */}
               {user ? (
-                <div className="px-4 pt-2">
-                  {profile?.role === 'admin' && (
-                    <Link href="/admin" className="block py-2">Quản trị</Link>
-                  )}
-                  {profile?.role === 'supplier' && (
-                    <Link href="/supplier" className="block py-2">Nhà cung cấp</Link>
-                  )}
-                  <Link href="/don-hang" className="block py-2">Đơn hàng của tôi</Link>
-                  <button onClick={signOut} className="text-destructive py-2">Đăng xuất</button>
-                </div>
+                  <div className="px-4 pt-2">
+                    {profile?.role === 'admin' && (
+                      <Link href="/admin" className="block py-2">Quản trị</Link>
+                    )}
+                    {profile?.role === 'supplier' && (
+                      <Link href="/supplier" className="block py-2">Nhà cung cấp</Link>
+                    )}
+                    <Link href="/profile" className="block py-2">Hồ sơ cá nhân</Link>
+                    <Link href="/don-hang" className="block py-2">Đơn hàng của tôi</Link>
+                    <button onClick={signOut} className="text-destructive py-2">Đăng xuất</button>
+                  </div>
               ) : (
                 <div className="px-4 pt-2">
                   <Link href="/dang-nhap">

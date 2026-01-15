@@ -117,8 +117,18 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
+  /**
+   * Hàm làm mới thông tin profile
+   * Được gọi sau khi cập nhật profile để đồng bộ state
+   */
+  async function refreshProfile() {
+    if (user) {
+      await fetchProfile(user.id)
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

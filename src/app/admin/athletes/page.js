@@ -25,18 +25,10 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Edit, Trash2, ArrowLeft, Search, User, MapPin, Phone, Mail, Calendar, Award, Users } from 'lucide-react'
+import { Trash2, ArrowLeft, Search, User, MapPin, Phone, Mail, Calendar, Award, Users } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
@@ -68,31 +60,11 @@ export default function AdminAthletesPage() {
   // State trạng thái loading
   const [loading, setLoading] = useState(true)
   
-  // State điều khiển hiển thị dialog chỉnh sửa
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  
-  // State lưu vận động viên đang được chỉnh sửa
-  const [editingAthlete, setEditingAthlete] = useState(null)
-  
   // State từ khóa tìm kiếm
   const [searchTerm, setSearchTerm] = useState('')
   
   // State lọc theo vai trò
   const [filterRole, setFilterRole] = useState('all')
-  
-  // State dữ liệu form chỉnh sửa
-  const [formData, setFormData] = useState({
-    full_name: '',                // Họ tên đầy đủ
-    email: '',                    // Email (chỉ đọc)
-    phone: '',                    // Số điện thoại
-    dob: '',                      // Ngày sinh
-    address: '',                  // Địa chỉ
-    region: '',                   // Khu vực/Tỉnh thành
-    role: 'athlete',              // Vai trò: admin hoặc athlete
-    club_id: '',                  // ID câu lạc bộ
-    running_experience_years: '', // Số năm kinh nghiệm chạy bộ
-    interests: ''                 // Sở thích
-  })
 
   /**
    * Effect kiểm tra quyền truy cập và tải dữ liệu ban đầu
@@ -131,87 +103,6 @@ export default function AdminAthletesPage() {
     
     // Tắt trạng thái loading
     setLoading(false)
-  }
-
-  /**
-   * Hàm đặt lại form về trạng thái ban đầu
-   * Được gọi sau khi chỉnh sửa thành công hoặc đóng dialog
-   */
-  function resetForm() {
-    setFormData({
-      full_name: '',
-      email: '',
-      phone: '',
-      dob: '',
-      address: '',
-      region: '',
-      role: 'athlete',
-      club_id: '',
-      running_experience_years: '',
-      interests: ''
-    })
-    setEditingAthlete(null)
-  }
-
-  /**
-   * Hàm mở dialog chỉnh sửa vận động viên
-   * Điền dữ liệu vận động viên cần sửa vào form
-   * @param {Object} athlete - Đối tượng vận động viên cần chỉnh sửa
-   */
-  function openEditDialog(athlete) {
-    setEditingAthlete(athlete)
-    setFormData({
-      full_name: athlete.full_name || '',
-      email: athlete.email || '',
-      phone: athlete.phone || '',
-      dob: athlete.dob || '',
-      address: athlete.address || '',
-      region: athlete.region || '',
-      role: athlete.role || 'athlete',
-      club_id: athlete.club_id?.toString() || '',
-      running_experience_years: athlete.running_experience_years?.toString() || '',
-      interests: athlete.interests || ''
-    })
-    setIsDialogOpen(true)
-  }
-
-  /**
-   * Hàm xử lý submit form chỉnh sửa vận động viên
-   * @param {Event} e - Sự kiện submit form
-   */
-  async function handleSubmit(e) {
-    // Ngăn hành vi mặc định của form
-    e.preventDefault()
-    
-    // Chuẩn bị dữ liệu để cập nhật (không bao gồm email vì không cho sửa)
-    const updateData = {
-      full_name: formData.full_name,
-      phone: formData.phone,
-      dob: formData.dob || null,
-      address: formData.address,
-      region: formData.region,
-      role: formData.role,
-      club_id: formData.club_id ? parseInt(formData.club_id) : null,
-      running_experience_years: formData.running_experience_years ? parseInt(formData.running_experience_years) : null,
-      interests: formData.interests
-    }
-
-    // Gọi API cập nhật thông tin vận động viên
-    const { error } = await supabase
-      .from('profiles')
-      .update(updateData)
-      .eq('id', editingAthlete.id)
-    
-    if (error) {
-      // Hiển thị thông báo lỗi nếu cập nhật thất bại
-      toast.error('Không thể cập nhật thông tin: ' + error.message)
-    } else {
-      // Hiển thị thông báo thành công và cập nhật danh sách
-      toast.success('Cập nhật thông tin thành công')
-      fetchData()
-      setIsDialogOpen(false)
-      resetForm()
-    }
   }
 
   /**
@@ -485,13 +376,9 @@ export default function AdminAthletesPage() {
                             }
                           </div>
                         </td>
-                        {/* Cột thao tác */}
+                        {/* Cột thao tác - chỉ có nút xóa */}
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
-                            {/* Nút chỉnh sửa */}
-                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(athlete)}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
                             {/* Nút xóa (ẩn nếu là chính mình) */}
                             {athlete.id !== user?.id && (
                               <Button 
@@ -518,155 +405,6 @@ export default function AdminAthletesPage() {
         <div className="mt-4 text-sm text-muted-foreground">
           Hiển thị {filteredAthletes.length} / {athletes.length} vận động viên
         </div>
-
-        {/* Dialog chỉnh sửa vận động viên */}
-        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Chỉnh sửa thông tin vận động viên</DialogTitle>
-            </DialogHeader>
-            
-            {/* Form chỉnh sửa */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Hàng 1: Họ tên và Email */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Trường họ tên */}
-                <div className="space-y-2">
-                  <Label>Họ và tên *</Label>
-                  <Input
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    placeholder="Nhập họ và tên"
-                    required
-                  />
-                </div>
-                {/* Trường email (chỉ đọc) */}
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input
-                    value={formData.email}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-xs text-muted-foreground">Email không thể thay đổi</p>
-                </div>
-              </div>
-
-              {/* Hàng 2: Số điện thoại và Ngày sinh */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Trường số điện thoại */}
-                <div className="space-y-2">
-                  <Label>Số điện thoại</Label>
-                  <Input
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="VD: 0901234567"
-                  />
-                </div>
-                {/* Trường ngày sinh */}
-                <div className="space-y-2">
-                  <Label>Ngày sinh</Label>
-                  <Input
-                    type="date"
-                    value={formData.dob}
-                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {/* Hàng 3: Khu vực và Địa chỉ */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Trường khu vực */}
-                <div className="space-y-2">
-                  <Label>Khu vực/Tỉnh thành</Label>
-                  <Input
-                    value={formData.region}
-                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                    placeholder="VD: Hà Nội, TP.HCM..."
-                  />
-                </div>
-                {/* Trường địa chỉ */}
-                <div className="space-y-2">
-                  <Label>Địa chỉ chi tiết</Label>
-                  <Input
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="Số nhà, đường, phường..."
-                  />
-                </div>
-              </div>
-
-              {/* Hàng 4: Vai trò và Câu lạc bộ */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Trường vai trò */}
-                <div className="space-y-2">
-                  <Label>Vai trò</Label>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) => setFormData({ ...formData, role: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn vai trò" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="athlete">Vận động viên</SelectItem>
-                      <SelectItem value="admin">Quản trị viên</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {/* Trường câu lạc bộ */}
-                <div className="space-y-2">
-                  <Label>Câu lạc bộ</Label>
-                  <Select
-                    value={formData.club_id}
-                    onValueChange={(value) => setFormData({ ...formData, club_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn câu lạc bộ" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Không có</SelectItem>
-                      {clubs.map((club) => (
-                        <SelectItem key={club.id} value={club.id.toString()}>
-                          {club.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Trường kinh nghiệm chạy bộ */}
-              <div className="space-y-2">
-                <Label>Số năm kinh nghiệm chạy bộ</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={formData.running_experience_years}
-                  onChange={(e) => setFormData({ ...formData, running_experience_years: e.target.value })}
-                  placeholder="VD: 5"
-                />
-              </div>
-
-              {/* Trường sở thích */}
-              <div className="space-y-2">
-                <Label>Sở thích</Label>
-                <Textarea
-                  value={formData.interests}
-                  onChange={(e) => setFormData({ ...formData, interests: e.target.value })}
-                  placeholder="VD: Marathon, Trail running, Ultra marathon..."
-                  rows={3}
-                />
-              </div>
-
-              {/* Nút submit form */}
-              <Button type="submit" className="w-full">
-                Cập nhật thông tin
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   )
